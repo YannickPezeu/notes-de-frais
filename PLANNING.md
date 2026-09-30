@@ -180,7 +180,14 @@ créée en **brouillon** (Save, jamais Submit). Doit marcher aussi sur télépho
   (clé + annuaire) peut retrouver quelles personnes ont utilisé le service depuis sa mise en
   service (pas quels jours passés ni ce qu'elles ont fait) ; personne d'autre. Déployé
   (image `sha256:2266ed6a…`), 47 tests.
-- [ ] **Envoyer les dossiers** à la cybersécurité et au DPO ; **avis bloquants** avant tout pilote
+- [x] **Dépôt GitHub** (30.09.2026) : https://github.com/YannickPezeu/notes-de-frais, **privé**
+  jusqu'au feu vert (le code et le dossier cybersécurité décrivent la surface d'attaque),
+  public ensuite. Avant le 1er commit : n° de personnel et n° de notes réels remplacés par
+  des valeurs fictives ; secrets exclus (.env, k8s/secret.yaml, .har) ; `.gitattributes`
+  (LF, bibliothèques tierces octet pour octet = empreintes du dossier). Image
+  `sha256:3e2fd33d…`.
+- [ ] **Envoyer les dossiers** à la cybersécurité et à la DPO ; **avis bloquants** avant tout pilote
+- [ ] Au feu vert : rendre le dépôt GitHub public
 - [ ] Au feu vert : retirer `ACCESS_PASSWORD` du secret (ou restreindre l'app Entra à un groupe)
 - [x] Rétention RCP (30.09.2026) : l'équipe RCP confirme que la plateforme ne garde aucune trace des
   requêtes. Écrit dans le dossier DPO ; points ouverts RCP et logs Kubernetes retirés.
