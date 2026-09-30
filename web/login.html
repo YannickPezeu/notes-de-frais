@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Notes de frais automatiques</title>
+<style>
+  :root { --bg: #f6f6f7; --card: #fff; --text: #1d1d1f; --muted: #5a5a60; --line: #e3e3e8; --red: #d0021b; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #151517; --card: #1f1f22; --text: #f2f2f4; --muted: #a8a8b0; --line: #34343a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 440px; margin: 0 auto; padding: 72px 16px; }
+  h1 { font-size: 24px; margin: 0 0 6px; }
+  p { color: var(--muted); margin: 0 0 22px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 22px; }
+  .card p { margin: 0 0 16px; }
+  a.btn, button { display: block; width: 100%; text-align: center; text-decoration: none; font: inherit; font-weight: 700; padding: 11px;
+    border: 0; border-radius: 999px; background: var(--red); color: #fff; cursor: pointer; }
+  label { display: block; font-weight: 600; margin-bottom: 6px; }
+  input { width: 100%; font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--text); margin-bottom: 14px; }
+  .err { color: var(--red); font-weight: 600; margin: 14px 0 0; }
+</style>
+</head>
+<body>
+<main>
+  <h1>🧾 Notes de frais automatiques</h1>
+  <p>{{INTRO}}</p>
+  <div class="card">
+    {{FORM}}
+    {{ERROR}}
+  </div>
+</main>
+</body>
+</html>

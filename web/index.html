@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Notes de frais automatiques</title>
+<style>
+  :root {
+    --bg: #f6f6f7; --card: #fff; --text: #1d1d1f; --muted: #5a5a60; --line: #e3e3e8;
+    --red: #d0021b; --red-soft: #fff1f2; --ok: #1a7f37;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #151517; --card: #1f1f22; --text: #f2f2f4; --muted: #a8a8b0; --line: #34343a; --red-soft: #3a1418; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  .lead { color: var(--muted); margin: 0 0 8px; font-size: 18px; }
+  .who { color: var(--muted); margin: 0 0 24px; font-size: 14px; }
+  .who a { color: inherit; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 22px; margin-bottom: 18px; }
+  .card h2 { font-size: 18px; margin: 0 0 14px; }
+  ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: s; }
+  ol.steps > li { counter-increment: s; position: relative; padding: 0 0 18px 48px; }
+  ol.steps > li:last-child { padding-bottom: 0; }
+  ol.steps > li::before { content: counter(s); position: absolute; left: 0; top: -2px; width: 32px; height: 32px; border-radius: 50%;
+    background: var(--red); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  kbd { font: 13px ui-monospace, Consolas, monospace; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 1px 6px; background: var(--bg); }
+  .drag-zone { margin: 12px 0 4px; padding: 18px; border: 2px dashed var(--red); border-radius: 10px; background: var(--red-soft); text-align: center; }
+  a.bookmarklet { display: inline-block; padding: 12px 22px; border-radius: 999px; background: var(--red); color: #fff; font-weight: 700;
+    font-size: 18px; text-decoration: none; cursor: grab; box-shadow: 0 3px 10px rgba(208,2,27,.3); }
+  a.bookmarklet:active { cursor: grabbing; }
+  .hint { color: var(--muted); font-size: 14px; margin: 8px 0 0; }
+  .flash { color: var(--red); font-weight: 600; min-height: 1.5em; margin: 8px 0 0; font-size: 14px; }
+  details { margin-top: 10px; }
+  summary { cursor: pointer; color: var(--muted); font-size: 15px; }
+  details ol { padding-left: 20px; font-size: 15px; }
+  textarea { width: 100%; height: 72px; font: 12px ui-monospace, Consolas, monospace; border: 1px solid var(--line); border-radius: 6px;
+    padding: 8px; background: var(--bg); color: var(--text); resize: none; }
+  button { font: inherit; font-size: 14px; padding: 6px 14px; border-radius: 6px; border: 1px solid var(--line); background: var(--card); color: var(--text); cursor: pointer; }
+  ul.facts { margin: 0; padding-left: 20px; }
+  ul.facts li { margin-bottom: 6px; }
+  .ok { color: var(--ok); }
+</style>
+</head>
+<body>
+<main>
+  <h1>🧾 Notes de frais automatiques</h1>
+  <p class="lead">Déposez les photos des justificatifs dans sesame : ils sont lus automatiquement et la note de frais est préparée pour vous.</p>
+  {{WHO}}
+
+  <section class="card">
+    <h2>Installation (une seule fois, 30 secondes)</h2>
+    <ol class="steps">
+      <li>
+        <b>Affichez la barre des favoris</b> de votre navigateur : appuyez sur <kbd>Ctrl</kbd> + <kbd>Maj</kbd> + <kbd>B</kbd>
+        (<kbd>⌘</kbd> + <kbd>Maj</kbd> + <kbd>B</kbd> sur Mac).
+      </li>
+      <li>
+        <b>Faites glisser ce bouton rouge</b> avec la souris jusque dans la barre des favoris, puis relâchez :
+        <div class="drag-zone">
+          <a class="bookmarklet" href="{{BOOKMARKLET}}" id="bm">🧾 Note de frais</a>
+          <p class="flash" id="flash" aria-live="polite"></p>
+        </div>
+        <details>
+          <summary>Le glisser-déposer ne marche pas ?</summary>
+          <ol>
+            <li>Cliquez sur <button type="button" id="copy">Copier le lien</button></li>
+            <li>Faites un clic droit sur la barre des favoris → <b>Ajouter une page…</b> (ou <b>Ajouter un favori</b>).</li>
+            <li>Nom : <b>🧾 Note de frais</b> — Adresse (URL) : collez avec <kbd>Ctrl</kbd> + <kbd>V</kbd>, puis enregistrez.</li>
+          </ol>
+          <textarea id="code" readonly aria-label="Lien du favori">{{BOOKMARKLET}}</textarea>
+        </details>
+      </li>
+      <li>
+        <b>C'est installé.</b> Vous pouvez masquer à nouveau la barre des favoris si vous le souhaitez.
+      </li>
+    </ol>
+  </section>
+
+  <section class="card">
+    <h2>Utilisation</h2>
+    <ol class="steps">
+      <li>Ouvrez <a href="https://sesame.epfl.ch" target="_blank" rel="noopener">sesame.epfl.ch</a> → <b>My Travel and Expenses</b>.</li>
+      <li>Cliquez sur le favori <b>🧾 Note de frais</b> : un panneau s'ouvre par-dessus sesame.</li>
+      <li>Glissez-y les photos des justificatifs (ou copiez-collez-les). Vérifiez les montants, choisissez le fonds et l'approbateur.</li>
+      <li>Cliquez sur <b>Créer le brouillon</b>. La note apparaît dans votre liste sesame : relisez-la, puis cliquez vous-même sur <b>Submit</b>.</li>
+    </ol>
+  </section>
+
+  <section class="card">
+    <h2>Bon à savoir</h2>
+    <ul class="facts">
+      <li>La note est créée <b>en brouillon</b> : rien n'est jamais soumis sans vous.</li>
+      <li>Les photos sont lues par un modèle d'IA hébergé <b>à l'EPFL</b> (RCP) et ne sont pas conservées par ce service. Elles sont jointes à la note dans sesame, comme si vous les aviez ajoutées à la main.</li>
+      <li>Le fonds et l'approbateur choisis sont mémorisés pour la note suivante.</li>
+      <li>Formats acceptés : photos (JPEG, PNG, HEIC d'iPhone, WebP, TIFF…) et PDF, y compris une liasse de plusieurs justificatifs scannés ensemble : chaque page est triée, les conditions générales et pages blanches sont écartées, et chaque justificatif devient sa propre ligne. Les formats peu courants sont joints à la note en JPEG.</li>
+    </ul>
+  </section>
+</main>
+<script>
+  // Un clic sur le bouton ici ne sert à rien : il faut le glisser dans les favoris.
+  const flash = document.getElementById('flash');
+  document.getElementById('bm').addEventListener('click', (e) => {
+    e.preventDefault();
+    flash.textContent = 'Ne cliquez pas : maintenez le bouton enfoncé et faites-le glisser dans la barre des favoris.';
+  });
+  document.getElementById('copy').addEventListener('click', async () => {
+    const code = document.getElementById('code');
+    try { await navigator.clipboard.writeText(code.value); }
+    catch { code.select(); document.execCommand('copy'); }
+    document.getElementById('copy').textContent = 'Copié ✓';
+  });
+</script>
+</body>
+</html>

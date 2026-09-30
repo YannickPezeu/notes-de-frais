@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Utilisation — notes de frais</title>
+<style>
+  :root { --bg: #f6f6f7; --card: #fff; --text: #1d1d1f; --muted: #5a5a60; --line: #e3e3e8; --red: #d0021b; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #151517; --card: #1f1f22; --text: #f2f2f4; --muted: #a8a8b0; --line: #34343a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 900px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 24px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 28px 0 10px; }
+  p.lead { color: var(--muted); margin: 0 0 8px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+  th, td { padding: 8px 12px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  th { font-weight: 600; color: var(--muted); font-size: 13px; }
+  tr:last-child td { border-bottom: 0; }
+  .empty { padding: 16px; color: var(--muted); }
+  a { color: inherit; }
+  .total { font-size: 18px; margin: 18px 0 0; }
+</style>
+</head>
+<body>
+<main>
+  <h1>🧾 Utilisation</h1>
+  <p class="lead">Aucun nom, e-mail ni identifiant en clair n'est enregistré. Heure suisse.</p>
+  <p class="total"><b>{{TOTAL}}</b> personne(s) au total depuis la mise en service</p>
+  <h2>Par mois</h2>
+  <div class="card">{{MONTHS}}</div>
+  <h2>Par jour</h2>
+  <div class="card">{{DAYS}}</div>
+  <p class="lead" style="margin-top:16px">Justificatifs lus = lectures ; pages triées = pages de PDF de plusieurs pages classées avant lecture.
+    « dont nouvelles » = personnes venues pour la première fois. Jours par personne = nombre moyen de jours d'utilisation dans le mois. <a href="{{BASE}}/">Retour</a></p>
+</main>
+</body>
+</html>

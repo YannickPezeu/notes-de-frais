@@ -1,0 +1,6 @@
+# Captures réseau : contiennent des cookies de session SSO et des données personnelles
+*.har
+
+# Secrets locaux
+.env
+k8s/secret.yaml

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: notes-de-frais-svc
+  namespace: epfl-chatbot
+spec:
+  selector:
+    app: notes-de-frais
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP

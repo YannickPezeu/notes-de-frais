@@ -1,0 +1,144 @@
+{
+ "save": {
+  "contentType": "multipart/mixed; boundary=866BF223653845B0FBBDC79CAFF1273D0",
+  "body": "--866BF223653845B0FBBDC79CAFF1273D0\r\nContent-Type: multipart/mixed; boundary=866BF223653845B0FBBDC79CAFF1273D1\r\nContent-Length:          705\r\n\r\n--866BF223653845B0FBBDC79CAFF1273D1\r\nContent-Type: application/http\r\nContent-Length: 537\r\ncontent-transfer-encoding: binary\r\n\r\nHTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 129\r\ndataserviceversion: 1.0\r\nsap-message: {\"code\":\"\",\"text\":\"Operation Completed with messages\",\"severity\":\"\",\"propertyref\":\"TravelAndExpenseHeaders('000123450000000000_____')\",\"details\":[{\"code\":\"56\",\"text\":\"Expense%20report%200010100005%20was%20saved\",\"propertyref\":\"\",\"severity\":\"S\",\"property\":\"\" }]}\r\ncache-control: no-cache, no-store\r\n\r\n{\"d\":{\"SaveHeader\":{\"__metadata\":{\"type\":\"PAOC_TRV_SRV.SaveHeaderResult\"},\"TravelAndExpenseHeaderID\":\"000123450010100005_____\"}}}\r\n--866BF223653845B0FBBDC79CAFF1273D1--\r\n\r\n--866BF223653845B0FBBDC79CAFF1273D0--\r\n"
+ },
+ "two_cost_assignments": {
+  "contentType": "multipart/mixed; boundary=9F9FA3FEB7EC911DAFC7D5C5DB3CBAD90",
+  "body": "--9F9FA3FEB7EC911DAFC7D5C5DB3CBAD90\r\nContent-Type: multipart/mixed; boundary=9F9FA3FEB7EC911DAFC7D5C5DB3CBAD91\r\nContent-Length:         2965\r\n\r\n--9F9FA3FEB7EC911DAFC7D5C5DB3CBAD91\r\nContent-Type: application/http\r\nContent-Length: 1334\r\ncontent-transfer-encoding: binary\r\n\r\nHTTP/1.1 201 Created\r\nContent-Type: application/json\r\nContent-Length: 807\r\ndataserviceversion: 2.0\r\nsap-message: {\"code\":\"\",\"text\":\"Operation Completed with messages\",\"severity\":\"\",\"propertyref\":\"CostAssignments('')\",\"details\":[{\"code\":\"PTRA_WEB_INTERFACE\",\"text\":\"Required%20entry%20field%20%22Fund%22%20is%20empty\",\"propertyref\":\"\",\"severity\":\"E\",\"property\":\"\" }]}\r\ncache-control: no-cache, no-store\r\nx-content-type-options: nosniff\r\nlocation: https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/CostAssignments('')\r\n\r\n{\"d\":{\"__metadata\":{\"id\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/CostAssignments('')\",\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/CostAssignments('')\",\"type\":\"PAOC_TRV_SRV.CostAssignment\"},\"AbsoluteAmount\":{\"__metadata\":{\"type\":\"PAOC_TRV_SRV.Absoluteamount\"},\"Value\":\"0.0000\",\"CurrencyCode\":\"\",\"Decimals\":0},\"PercAbs\":\"\",\"CostObjectTypeDescription\":\"\",\"CostAssignmentID\":\"\",\"Percentage\":\"100.00\",\"CostObjectDescription\":\"\",\"CostObjectID\":\"\",\"MileageID\":\"\",\"TravelAndExpenseHeaderID\":\"000123450000000000_____\",\"CostObjectTypeID\":\"\",\"ExpenseID\":\"\",\"PsPosidDesc\":\"\",\"PsPosid\":\"\",\"ZzcZuonr\":\"\",\"HasOtp\":false,\"Fund\":\"\",\"Fistl\":\"\",\"LineId\":\"0\",\"CostObject\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/CostAssignments('')/CostObject\"}}}}\r\n--9F9FA3FEB7EC911DAFC7D5C5DB3CBAD91\r\nContent-Type: application/http\r\nContent-Length: 1332\r\ncontent-transfer-encoding: binary\r\n\r\nHTTP/1.1 201 Created\r\nContent-Type: application/json\r\nContent-Length: 805\r\ndataserviceversion: 2.0\r\nsap-message: {\"code\":\"\",\"text\":\"Operation Completed with messages\",\"severity\":\"\",\"propertyref\":\"CostAssignments('')\",\"details\":[{\"code\":\"PTRA_WEB_INTERFACE\",\"text\":\"Required%20entry%20field%20%22Fund%22%20is%20empty\",\"propertyref\":\"\",\"severity\":\"E\",\"property\":\"\" }]}\r\ncache-control: no-cache, no-store\r\nx-content-type-options: nosniff\r\nlocation: https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/CostAssignments('')\r\n\r\n{\"d\":{\"__metadata\":{\"id\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/CostAssignments('')\",\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/CostAssignments('')\",\"type\":\"PAOC_TRV_SRV.CostAssignment\"},\"AbsoluteAmount\":{\"__metadata\":{\"type\":\"PAOC_TRV_SRV.Absoluteamount\"},\"Value\":\"0.0000\",\"CurrencyCode\":\"\",\"Decimals\":0},\"PercAbs\":\"\",\"CostObjectTypeDescription\":\"\",\"CostAssignmentID\":\"\",\"Percentage\":\"0.00\",\"CostObjectDescription\":\"\",\"CostObjectID\":\"\",\"MileageID\":\"\",\"TravelAndExpenseHeaderID\":\"000123450000000000_____\",\"CostObjectTypeID\":\"\",\"ExpenseID\":\"\",\"PsPosidDesc\":\"\",\"PsPosid\":\"\",\"ZzcZuonr\":\"\",\"HasOtp\":false,\"Fund\":\"\",\"Fistl\":\"\",\"LineId\":\"1\",\"CostObject\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/CostAssignments('')/CostObject\"}}}}\r\n--9F9FA3FEB7EC911DAFC7D5C5DB3CBAD91--\r\n\r\n--9F9FA3FEB7EC911DAFC7D5C5DB3CBAD90--\r\n"
+ },
+ "expense_create": {
+  "contentType": "multipart/mixed; boundary=3A1AFAE1B97F422B6CD437502BDD36DD0",
+  "body": "--3A1AFAE1B97F422B6CD437502BDD36DD0\r\nContent-Type: multipart/mixed; boundary=3A1AFAE1B97F422B6CD437502BDD36DD1\r\nContent-Length:         6013\r\n\r\n--3A1AFAE1B97F422B6CD437502BDD36DD1\r\nContent-Type: application/http\r\nContent-Length: 5844\r\ncontent-transfer-encoding: binary\r\n\r\nHTTP/1.1 201 Created\r\nContent-Type: application/json\r\nContent-Length: 5396\r\ndataserviceversion: 2.0\r\nsap-message: {\"code\":\"\",\"text\":\"Operation Completed with messages\",\"severity\":\"\",\"propertyref\":\"TravelAndExpenseHeaders('000123450000000000_____')\",\"details\":[]}\r\ncache-control: no-cache, no-store\r\nx-content-type-options: nosniff\r\nlocation: https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/Expenses('000123450000000000_____E001_____')\r\n\r\n{\"d\":{\"__metadata\":{\"id\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/Expenses('000123450000000000_____E001_____')\",\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/Expenses('000123450000000000_____E001_____')\",\"type\":\"PAOC_TRV_SRV.Expense\"},\"ReceiptAmountLeftToItemize\":{\"__metadata\":{\"type\":\"PAOC_TRV_SRV.Absoluteamount\"},\"Value\":\"0.0000\",\"CurrencyCode\":\"CHF\",\"Decimals\":2},\"Address\":{\"__metadata\":{\"type\":\"PAOC_TRV_SRV.Address\"},\"FullName\":\"No distinction Switzerland\",\"City\":\"\",\"District\":\"\",\"PostalCode\":\"\",\"CityCode\":\"\",\"StreetName\":\"\",\"StreetNumber\":\"\",\"Country\":\"CH\",\"Region\":\"\",\"Location\":\"\",\"FullName_FC\":0,\"City_FC\":0,\"District_FC\":0,\"PostalCode_FC\":0,\"CityCode_FC\":0,\"StreetName_FC\":0,\"StreetNumber_FC\":0,\"Country_FC\":0,\"Region_FC\":0,\"Location_FC\":0,\"RegionDescription\":\"\",\"CountryDescription\":\"Switzerland\"},\"ConvertedAmount\":{\"__metadata\":{\"type\":\"PAOC_TRV_SRV.Absoluteamount\"},\"Value\":\"0.0000\",\"CurrencyCode\":\"CHF\",\"Decimals\":2},\"MaximumAmount\":{\"__metadata\":{\"type\":\"PAOC_TRV_SRV.Absoluteamount\"},\"Value\":\"0.0000\",\"CurrencyCode\":\"\",\"Decimals\":0},\"ReceiptAmount\":{\"__metadata\":{\"type\":\"PAOC_TRV_SRV.Absoluteamount\"},\"Value\":\"0.0000\",\"CurrencyCode\":\"CHF\",\"Decimals\":2},\"SeAddress\":{\"__metadata\":{\"type\":\"PAOC_TRV_SRV.Address\"},\"FullName\":\"\",\"City\":\"\",\"District\":\"\",\"PostalCode\":\"\",\"CityCode\":\"\",\"StreetName\":\"\",\"StreetNumber\":\"\",\"Country\":\"\",\"Region\":\"\",\"Location\":\"\",\"FullName_FC\":0,\"City_FC\":0,\"District_FC\":0,\"PostalCode_FC\":0,\"CityCode_FC\":0,\"StreetName_FC\":0,\"StreetNumber_FC\":0,\"Country_FC\":0,\"Region_FC\":0,\"Location_FC\":0,\"RegionDescription\":\"\",\"CountryDescription\":\"\"},\"PrivateDeductionAmount\":{\"__metadata\":{\"type\":\"PAOC_TRV_SRV.Absoluteamount\"},\"Value\":\"0.0000\",\"CurrencyCode\":\"CHF\",\"Decimals\":2},\"FromLocation\":\"\",\"FromLocation_FC\":0,\"ToLocation\":\"\",\"ToLocation_FC\":0,\"Attendee_FC\":0,\"EnterpriseType\":\"\",\"EnterpriseType_FC\":0,\"ExpenseTypeDescription\":\"Dinner-Evening meal /Cash\",\"PerDiemRegion\":\"EMPTY\",\"PerDiemRegion_FC\":0,\"PerDiemRegionDescription\":\"No distinction\",\"TaxJurisdictionDescription\":\"\",\"TaxJurisdictionID\":\"\",\"Attachments_FC\":0,\"BusinessPartner\":\"\",\"BusinessPartner_FC\":0,\"BusinessPurpose\":\"\",\"BusinessPurpose_FC\":0,\"CCTransaction_FC\":0,\"CCTransactionDescription\":\"\",\"CheckResult\":\"\",\"ConvertedAmount_FC\":0,\"Description\":\"\",\"Description_FC\":0,\"EnterpriseTypeDescription\":\"\",\"ExchangeRate\":\"1.00000\",\"ExchangeRate_FC\":0,\"ExpenseDate\":\"\\/Date(1790208000000)\\/\",\"ExpenseDate_FC\":0,\"ExpenseID\":\"000123450000000000_____E001_____\",\"ExpenseNumber\":\"0\",\"ExpenseNumber_FC\":0,\"ExpenseSource\":\"\",\"ExpenseSource_FC\":0,\"ChangeExpType_FC\":0,\"ExpenseTypeID\":\"E230\",\"FromDate\":null,\"FromDate_FC\":0,\"IsItemizable\":false,\"LimitViolation\":false,\"Memo\":\"\",\"Memo_FC\":0,\"NumberOfAttendees\":0,\"NumberOfAttendees_FC\":0,\"NumberOfBreakfasts\":0,\"NumberOfBreakfasts_FC\":0,\"NumberOfDinners\":0,\"NumberOfDinners_FC\":0,\"NumberOfLunches\":0,\"NumberOfLunches_FC\":0,\"PaidByCompany\":false,\"PaidByCompany_FC\":0,\"ParentExpenseID\":\"\",\"Personal\":false,\"Personal_FC\":0,\"ReceiptAmount_FC\":0,\"Receiptno\":\"001\",\"Receiptno_FC\":0,\"ServiceProvider\":\"\",\"ServiceProvider_FC\":0,\"ServiceProviderDescription\":\"\",\"TaxCode\":\"\",\"TaxCode_FC\":0,\"TaxCodeDescription\":\"\",\"TaxJurisdiction_FC\":0,\"ToDate\":null,\"ToDate_FC\":0,\"TravelAndExpenseHeaderID\":\"000123450000000000_____\",\"UnassignedClaimID\":\"\",\"PaperReceipt\":false,\"PaperReceipt_FC\":0,\"CDoc\":\"\",\"CDoc_FC\":0,\"PPrv\":\"\",\"PPrv_FC\":0,\"NStf\":\"\",\"NStf_FC\":0,\"NPtn\":\"\",\"NPtn_FC\":0,\"NGst\":\"\",\"NGst_FC\":0,\"Airline\":\"\",\"Airline_FC\":0,\"AirCabinClass\":\"\",\"AirCabinClass_FC\":0,\"AirTicketNumber\":\"\",\"AirTicketNumber_FC\":0,\"CarOdometerReading\":\"00000000\",\"CarOdometerReading_FC\":0,\"SeName\":\"\",\"SeName_FC\":0,\"SeCustomerServicePhone\":\"\",\"SeCustomerServicePhone_FC\":0,\"ResetPrivateShare\":false,\"ResetPrivateShare_FC\":0,\"AllowedChangeExpenseTypes\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/Expenses('000123450000000000_____E001_____')/AllowedChangeExpenseTypes\"}},\"ServiceProviders\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/Expenses('000123450000000000_____E001_____')/ServiceProviders\"}},\"Attachments\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/Expenses('000123450000000000_____E001_____')/Attachments\"}},\"ChildrenExpenses\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/Expenses('000123450000000000_____E001_____')/ChildrenExpenses\"}},\"AllowedChildrenExpenseTypes\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/Expenses('000123450000000000_____E001_____')/AllowedChildrenExpenseTypes\"}},\"CostAssignments\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/Expenses('000123450000000000_____E001_____')/CostAssignments\"}},\"Attendees\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/Expenses('000123450000000000_____E001_____')/Attendees\"}},\"ExpenseType\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/Expenses('000123450000000000_____E001_____')/ExpenseType\"}},\"TaxJurisdictions\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/Expenses('000123450000000000_____E001_____')/TaxJurisdictions\"}},\"ItemGroups\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/Expenses('000123450000000000_____E001_____')/ItemGroups\"}}}}\r\n--3A1AFAE1B97F422B6CD437502BDD36DD1--\r\n\r\n--3A1AFAE1B97F422B6CD437502BDD36DD0--\r\n"
+ },
+ "header_merge": {
+  "contentType": "multipart/mixed; boundary=765483F384920BB5114AD6E4CA25730E0",
+  "body": "--765483F384920BB5114AD6E4CA25730E0\r\nContent-Type: multipart/mixed; boundary=765483F384920BB5114AD6E4CA25730E1\r\nContent-Length:          470\r\n\r\n--765483F384920BB5114AD6E4CA25730E1\r\nContent-Type: application/http\r\nContent-Length: 302\r\ncontent-transfer-encoding: binary\r\n\r\nHTTP/1.1 204 No Content\r\nContent-Length: 0\r\ndataserviceversion: 2.0\r\nsap-message: {\"code\":\"\",\"text\":\"Operation Completed with messages\",\"severity\":\"\",\"propertyref\":\"TravelAndExpenseHeaders('000123450000000000_____')\",\"details\":[]}\r\ncache-control: no-cache, no-store\r\nx-content-type-options: nosniff\r\n\r\n\r\n--765483F384920BB5114AD6E4CA25730E1--\r\n\r\n--765483F384920BB5114AD6E4CA25730E0--\r\n"
+ },
+ "header_create": {
+  "contentType": "multipart/mixed; boundary=58DA39F26D0DE74713B7421591F55C3F0",
+  "body": "--58DA39F26D0DE74713B7421591F55C3F0\r\nContent-Type: multipart/mixed; boundary=58DA39F26D0DE74713B7421591F55C3F1\r\nContent-Length:         6575\r\n\r\n--58DA39F26D0DE74713B7421591F55C3F1\r\nContent-Type: application/http\r\nContent-Length: 6406\r\ncontent-transfer-encoding: binary\r\n\r\nHTTP/1.1 201 Created\r\nContent-Type: application/json\r\nContent-Length: 6115\r\ndataserviceversion: 2.0\r\ncache-control: no-cache, no-store\r\nx-content-type-options: nosniff\r\nlocation: https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/TravelAndExpenseHeaders('000123450000000000_____')\r\n\r\n{\"d\":{\"__metadata\":{\"id\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/TravelAndExpenseHeaders('000123450000000000_____')\",\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/TravelAndExpenseHeaders('000123450000000000_____')\",\"type\":\"PAOC_TRV_SRV.TravelAndExpenseHeader\"},\"TotalCost\":{\"__metadata\":{\"type\":\"PAOC_TRV_SRV.Absoluteamount\"},\"Value\":\"0.0000\",\"CurrencyCode\":\"CHF\",\"Decimals\":0},\"TotalReimbursement\":{\"__metadata\":{\"type\":\"PAOC_TRV_SRV.Absoluteamount\"},\"Value\":\"0.0000\",\"CurrencyCode\":\"\",\"Decimals\":0},\"SchemaSettings\":{\"__metadata\":{\"type\":\"PAOC_TRV_SRV.SchemaSettings\"},\"DetailedMileageAddress\":false,\"MultiDayTrip\":true,\"BorderCrossing\":false,\"MileageCostAssignment\":false,\"TripCostAssignment\":true,\"ExpenseCostAssignment\":true,\"TripBreak\":false,\"DestinationNumber\":1,\"TripBreakCountry\":false,\"Domestic_International\":2,\"TripStopOver\":false},\"Category\":\"\",\"CategoryDescription\":\"\",\"IsRecalculationNeeded\":false,\"MainDestinationFullName\":\"Switzerland\",\"PersistenceStatus\":0,\"ReturnTripCountryDescription\":\"\",\"ReturnTripRegionDescription\":\"\",\"AccommodationPerDiem\":false,\"AccommodationPerDiem_FC\":0,\"MealsPerDiem\":false,\"MealsPerDiem_FC\":0,\"ApproverName\":\"\",\"ApproverName_FC\":0,\"TravelAndExpenseHeaderID\":\"000123450000000000_____\",\"Status\":1,\"SchemaID\":\"Z2\",\"LandingDate\":null,\"DepartureDate\":null,\"ReturnTripBorderCrossingDate\":null,\"TripOutBorderCrossingDate\":null,\"ReturnTripCountry\":\"\",\"ReturnTripRegion\":\"\",\"EnterpriseType\":\"\",\"StatutoryType\":\"\",\"ActivityType\":\"\",\"ApprovalStatus\":0,\"LastChangeDate\":null,\"ChangedBy\":\"\",\"Editable\":false,\"Deletable\":false,\"Reason\":\"\",\"ToDate\":\"\\/Date(1790272800000)\\/\",\"FromDate\":\"\\/Date(1790236800000)\\/\",\"Commentary\":\"\",\"FromDate_DATE_FC\":0,\"ToDate_DATE_FC\":0,\"Reason_FC\":0,\"TripOutBorderCrossingDate_DATE_FC\":0,\"TripOutBorderCrossingDate_TIME_FC\":0,\"LandingDate_DATE_FC\":0,\"LandingDate_TIME_FC\":0,\"DepartureDate_DATE_FC\":0,\"DepartureDate_TIME_FC\":0,\"ReturnTripBorderCrossingDate_DATE_FC\":0,\"ReturnTripBorderCrossingDate_TIME_FC\":0,\"ReturnTripCountry_FC\":0,\"ReturnTripRegion_FC\":0,\"EnterpriseType_FC\":0,\"StatutoryType_FC\":0,\"ActivityType_FC\":0,\"Commentary_FC\":0,\"FromDate_TIME_FC\":0,\"ToDate_TIME_FC\":0,\"UserAction\":1,\"TripNumber\":\"0000000000\",\"PersonalNumber\":\"00012345\",\"EnterpriseTypeDescription\":\"\",\"StatutoryTypeDescription\":\"\",\"ActivityTypeDescription\":\"\",\"ZotherFund\":false,\"ZisExterne\":false,\"SciperBenef\":\"\",\"ZapprovalNote\":\"\",\"Zduplicable\":false,\"ZestimatedTotal\":\"0.000\",\"Approver\":\"\",\"ZestimatedCurrency\":\"\",\"NameFirstBenef\":\"\",\"NameLastBenef\":\"\",\"Cities\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/TravelAndExpenseHeaders('000123450000000000_____')/Cities\"}},\"Currencies\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/TravelAndExpenseHeaders('000123450000000000_____')/Currencies\"}},\"Countries\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/TravelAndExpenseHeaders('000123450000000000_____')/Countries\"}},\"Destinations\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/TravelAndExpenseHeaders('000123450000000000_____')/Destinations\"}},\"Claims\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/TravelAndExpenseHeaders('000123450000000000_____')/Claims\"}},\"CostAssignments\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/TravelAndExpenseHeaders('000123450000000000_____')/CostAssignments\"}},\"Attachments\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/TravelAndExpenseHeaders('000123450000000000_____')/Attachments\"}},\"MainDestination\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/TravelAndExpenseHeaders('000123450000000000_____')/MainDestination\"}},\"ExpenseTypes\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/TravelAndExpenseHeaders('000123450000000000_____')/ExpenseTypes\"}},\"UnassignedClaims\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/TravelAndExpenseHeaders('000123450000000000_____')/UnassignedClaims\"}},\"ActivityTypes\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/TravelAndExpenseHeaders('000123450000000000_____')/ActivityTypes\"}},\"StatutoryTypes\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/TravelAndExpenseHeaders('000123450000000000_____')/StatutoryTypes\"}},\"EnterpriseTypes\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/TravelAndExpenseHeaders('000123450000000000_____')/EnterpriseTypes\"}},\"ServiceProviders\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/TravelAndExpenseHeaders('000123450000000000_____')/ServiceProviders\"}},\"TaxCodes\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/TravelAndExpenseHeaders('000123450000000000_____')/TaxCodes\"}},\"VehicleClasses\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/TravelAndExpenseHeaders('000123450000000000_____')/VehicleClasses\"}},\"VehicleTypes\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/TravelAndExpenseHeaders('000123450000000000_____')/VehicleTypes\"}},\"PerDiemRegions\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/TravelAndExpenseHeaders('000123450000000000_____')/PerDiemRegions\"}},\"Notes\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/TravelAndExpenseHeaders('000123450000000000_____')/Notes\"}},\"PrintPreviews\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/TravelAndExpenseHeaders('000123450000000000_____')/PrintPreviews\"}},\"UnassignedAttachments\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/TravelAndExpenseHeaders('000123450000000000_____')/UnassignedAttachments\"}},\"AttachmentRibs\":{\"__deferred\":{\"uri\":\"https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/TravelAndExpenseHeaders('000123450000000000_____')/AttachmentRibs\"}}}}\r\n--58DA39F26D0DE74713B7421591F55C3F1--\r\n\r\n--58DA39F26D0DE74713B7421591F55C3F0--\r\n"
+ },
+ "destination_get": {
+  "__metadata": {
+   "id": "https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/Destinations('000123450000000000_1M____')",
+   "uri": "https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/Destinations('000123450000000000_1M____')",
+   "type": "PAOC_TRV_SRV.Destination"
+  },
+  "Address": {
+   "__metadata": {
+    "type": "PAOC_TRV_SRV.Address"
+   },
+   "FullName": "Switzerland",
+   "City": "",
+   "District": "",
+   "PostalCode": "",
+   "CityCode": "",
+   "StreetName": "",
+   "StreetNumber": "",
+   "Country": "CH",
+   "Region": "",
+   "Location": "",
+   "FullName_FC": 3,
+   "City_FC": 0,
+   "District_FC": 0,
+   "PostalCode_FC": 0,
+   "CityCode_FC": 0,
+   "StreetName_FC": 0,
+   "StreetNumber_FC": 0,
+   "Country_FC": 3,
+   "Region_FC": 0,
+   "Location_FC": 3,
+   "RegionDescription": "",
+   "CountryDescription": "Switzerland (CH)"
+  },
+  "ItineraryNumberID_FC": 1,
+  "CommunityID": "",
+  "CommunityDescription": "",
+  "Community_FC": 0,
+  "PerDiemRegion_FC": 0,
+  "DestinationID": "000123450000000000_1M____",
+  "TravelAndExpenseHeaderID": "000123450000000000_____",
+  "BeginningDate": "/Date(1789200000000)/",
+  "Reason": "",
+  "EnterpriseType": "",
+  "StatutoryType": "",
+  "ActivityType": "",
+  "ItineraryNumberID": "00",
+  "NoNight": 0,
+  "PerDiemRegion": "EMPTY",
+  "Reason_FC": 1,
+  "EnterpriseType_FC": 0,
+  "StatutoryType_FC": 0,
+  "ActivityType_FC": 0,
+  "DestinationType": "M",
+  "NoNight_FC": 3,
+  "EnterpriseTypeDescription": "All Trips",
+  "PerDiemRegionDescription": "No distinction",
+  "StatutoryTypeDescription": "Business Trip",
+  "ActivityTypeDescription": "All Trips",
+  "BeginningDate_FC": 1,
+  "Communities": {
+   "__deferred": {
+    "uri": "https://sesame.epfl.ch:443/sap/opu/odata/sap/PAOC_TRV_SRV/Destinations('000123450000000000_1M____')/Communities"
+   }
+  }
+ },
+ "destination_merge_by_ui": {
+  "Address": {
+   "__metadata": {
+    "type": "PAOC_TRV_SRV.Address"
+   },
+   "FullName": "Switzerland",
+   "City": "",
+   "District": "",
+   "PostalCode": "",
+   "CityCode": "",
+   "StreetName": "",
+   "Country": "DE",
+   "Region": "",
+   "Location": "berlin",
+   "FullName_FC": 3,
+   "City_FC": 0,
+   "District_FC": 0,
+   "PostalCode_FC": 0,
+   "CityCode_FC": 0,
+   "StreetName_FC": 0,
+   "StreetNumber_FC": 0,
+   "Country_FC": 3,
+   "Region_FC": 0,
+   "Location_FC": 3,
+   "RegionDescription": "",
+   "CountryDescription": "Germany (DE)"
+  },
+  "ItineraryNumberID_FC": 1,
+  "CommunityID": "",
+  "CommunityDescription": "",
+  "Community_FC": 0,
+  "PerDiemRegion_FC": 0,
+  "DestinationID": "000123450000000000_1M____",
+  "TravelAndExpenseHeaderID": "000123450000000000_____",
+  "BeginningDate": "/Date(1789200000000)/",
+  "Reason": "",
+  "EnterpriseType": "",
+  "StatutoryType": "",
+  "ActivityType": "",
+  "ItineraryNumberID": "00",
+  "NoNight": 0,
+  "PerDiemRegion": "",
+  "Reason_FC": 1,
+  "EnterpriseType_FC": 0,
+  "StatutoryType_FC": 0,
+  "ActivityType_FC": 0,
+  "DestinationType": "M",
+  "NoNight_FC": 3,
+  "EnterpriseTypeDescription": "All Trips",
+  "PerDiemRegionDescription": "",
+  "StatutoryTypeDescription": "Business Trip",
+  "ActivityTypeDescription": "All Trips",
+  "BeginningDate_FC": 1,
+  "__metadata": {
+   "type": "PAOC_TRV_SRV.Destination"
+  }
+ }
+}

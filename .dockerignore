@@ -1,0 +1,6 @@
+.env
+*.har
+.git
+tests
+docs
+k8s

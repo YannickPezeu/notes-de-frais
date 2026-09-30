@@ -1,0 +1,12 @@
+# Volume des compteurs d'usage anonymes (/data/stats.json, quelques Ko) : survit aux déploiements.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: notes-de-frais-data
+  namespace: epfl-chatbot
+spec:
+  storageClassName: dsi-nas
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 100Mi

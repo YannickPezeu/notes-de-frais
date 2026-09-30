@@ -1,0 +1,8 @@
+# Fins de ligne LF partout : le serveur tourne sous Linux.
+* text=auto eol=lf
+# Bibliothèques tierces servies octet pour octet : leurs empreintes SHA-256 figurent
+# dans le dossier cybersécurité (docs/dossiers/dossier-cybersecurite.md).
+web/vendor/** -text
+*.pdf binary
+*.jpg binary
+*.png binary

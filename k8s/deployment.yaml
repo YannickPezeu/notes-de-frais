@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notes-de-frais
+  namespace: epfl-chatbot
+  labels:
+    app: notes-de-frais
+spec:
+  # Un seul pod : quotas en mémoire (server/rate-limit.mjs) et compteurs d'usage dans un
+  # fichier du volume (server/stats.mjs). Recreate : jamais deux pods qui écrivent ce fichier.
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: notes-de-frais
+  template:
+    metadata:
+      labels:
+        app: notes-de-frais
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: notes-de-frais
+          image: ic-registry.epfl.ch/mr-pezeu/notes-de-frais:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8787
+          envFrom:
+            - secretRef:
+                name: notes-de-frais-secrets   # RCP_API_KEY, ACCESS_PASSWORD, SESSION_SECRET, ENTRA_CLIENT_SECRET, STATS_SECRET
+          env:
+            - name: BASE_PATH
+              value: /notes-de-frais
+            - name: PUBLIC_URL
+              value: https://expert-finder.epfl.ch/notes-de-frais
+            - name: ALLOWED_ORIGINS
+              value: https://sesame.epfl.ch
+            # Application Entra « notesDeFrais » (App Portal EPFL) ; le secret client est dans le Secret.
+            - name: ENTRA_TENANT_ID
+              value: f6c2556a-c4fb-4ab1-a2c7-9e220df11c43
+            - name: ENTRA_CLIENT_ID
+              value: 7bf39c1e-e6cb-457f-b4c5-f77616dbcabc
+            # Compteurs d'usage anonymes (personnes, appels, jetons), page /stats.
+            - name: STATS_FILE
+              value: /data/stats.json
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: notes-de-frais-data

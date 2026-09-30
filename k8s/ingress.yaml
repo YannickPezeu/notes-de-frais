@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: notes-de-frais-ingress
+  namespace: epfl-chatbot
+  annotations:
+    # Photos de justificatifs envoyées en data URL (~300 Ko, 6 Mo au plus).
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: expert-finder.epfl.ch
+      http:
+        paths:
+          # Pas de réécriture : le chemin complet arrive au pod, qui retire BASE_PATH.
+          - path: /notes-de-frais
+            pathType: Prefix
+            backend:
+              service:
+                name: notes-de-frais-svc
+                port:
+                  number: 80
