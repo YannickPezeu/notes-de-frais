@@ -8,7 +8,7 @@
   "//": "Bibliothèques du navigateur copiées dans web/vendor/ (voir web/vendor/README.md), déclarées ici pour que les scanners de vulnérabilités (OSV, Dependabot) les suivent. Elles ne sont pas installées par le serveur.",
   "dependencies": {
     "heic2any": "0.0.4",
-    "pdfjs-dist": "6.3.289",
+    "pdfjs-dist": "6.4.299",
     "utif": "3.1.0"
   }
 }
