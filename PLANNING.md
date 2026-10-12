@@ -209,6 +209,15 @@ créée en **brouillon** (Save, jamais Submit). Doit marcher aussi sur télépho
   d'origine ; `azp` vérifié, clés Entra relues toutes les 24 h (5 min mini) ; adresse du favori
   échappée. Parcours complet revérifié dans Chrome. Laissé et documenté : confiance dans
   l'ingress pour l'IP, bibliothèques publiques, conservation des empreintes. 52 tests.
+- [x] **4e audit automatique EPFL** (12.10.2026, job-23072e81, 3 Medium). Corrigé (image
+  `sha256:ce00817e…`, désormais **épinglée par digest** au déploiement) : types de frais =
+  identifiants connus du serveur (`server/expense-types.mjs`, test de concordance avec ndf.js),
+  libellés du serveur dans la consigne → plus aucun texte libre du client vers le modèle ;
+  `/stats` réservée à `STATS_ADMINS` ; bibliothèques déclarées dans `package.json` + lockfile
+  (OSV) et alertes Dependabot activées sur le dépôt ; secrets injectés un par un
+  (`secretKeyRef`, ACCESS_PASSWORD facultatif) ; 12 appels au modèle simultanés au plus,
+  images ≤ 3 Mo, pod à 512 Mi ; un seul redémarrage par déploiement. Non fait : NetworkPolicy
+  (à voir avec l'exploitant du cluster). 52 tests.
 - [ ] **Envoyer les dossiers** à la cybersécurité et à la DPO ; **avis bloquants** avant tout pilote
 - [ ] Au feu vert : rendre le dépôt GitHub public
 - [ ] Au feu vert : retirer `ACCESS_PASSWORD` du secret (ou restreindre l'app Entra à un groupe)

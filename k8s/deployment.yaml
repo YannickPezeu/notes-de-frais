@@ -18,6 +18,9 @@ spec:
     metadata:
       labels:
         app: notes-de-frais
+      annotations:
+        # Remplacé à chaque déploiement par update.ps1 : un seul redémarrage par déploiement.
+        notes-de-frais/deploy: "{{DEPLOY_ID}}"
     spec:
       securityContext:
         runAsNonRoot: true
@@ -26,15 +29,42 @@ spec:
         fsGroup: 1000
       containers:
         - name: notes-de-frais
+          # update.ps1 remplace :latest par l'empreinte (digest) de l'image qu'il vient de pousser :
+          # le pod exécute exactement cette image, pas « la dernière » du registre.
           image: ic-registry.epfl.ch/mr-pezeu/notes-de-frais:latest
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           ports:
             - name: http
               containerPort: 8787
-          envFrom:
-            - secretRef:
-                name: notes-de-frais-secrets   # RCP_API_KEY, ACCESS_PASSWORD, SESSION_SECRET, ENTRA_CLIENT_SECRET, STATS_SECRET
           env:
+            # Secrets : un par un, rien d'autre du Secret n'entre dans le conteneur.
+            - name: RCP_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: notes-de-frais-secrets
+                  key: RCP_API_KEY
+            - name: SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: notes-de-frais-secrets
+                  key: SESSION_SECRET
+            - name: ENTRA_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: notes-de-frais-secrets
+                  key: ENTRA_CLIENT_SECRET
+            - name: STATS_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: notes-de-frais-secrets
+                  key: STATS_SECRET
+            # Mot de passe de la phase de test : facultatif, à retirer du Secret au feu vert.
+            - name: ACCESS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: notes-de-frais-secrets
+                  key: ACCESS_PASSWORD
+                  optional: true
             - name: BASE_PATH
               value: /notes-de-frais
             - name: PUBLIC_URL
@@ -49,6 +79,9 @@ spec:
             # Compteurs d'usage anonymes (personnes, appels, jetons), page /stats.
             - name: STATS_FILE
               value: /data/stats.json
+            # Page /stats réservée à ces adresses (séparées par des virgules).
+            - name: STATS_ADMINS
+              value: yannick.pezeu@epfl.ch
           volumeMounts:
             - name: data
               mountPath: /data
@@ -57,7 +90,7 @@ spec:
               memory: "64Mi"
               cpu: "50m"
             limits:
-              memory: "256Mi"
+              memory: "512Mi"
               cpu: "500m"
           readinessProbe:
             httpGet:

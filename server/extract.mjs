@@ -5,9 +5,10 @@
 export const MODEL = process.env.RCP_MODEL || 'zai-org/GLM-5.3-Flash';
 export const RCP_URL = (process.env.RCP_URL || 'https://inference.rcp.epfl.ch/v1').replace(/\/$/, '') + '/chat/completions';
 
+import { EXPENSE_TYPES } from './expense-types.mjs';
+
 const MAX_TYPES = 100;
 const TYPE_ID = /^[A-Z0-9]{3,4}$/;
-const TYPE_LABEL = /^[\p{L}\p{N} \-/&.,()']{1,50}$/u;
 
 /**
  * Types de frais envoyés par le client (relus dans SAP). Validation stricte :
@@ -15,12 +16,12 @@ const TYPE_LABEL = /^[\p{L}\p{N} \-/&.,()']{1,50}$/u;
  */
 export function validateTypes(types) {
   if (!Array.isArray(types) || !types.length || types.length > MAX_TYPES) throw new Error('liste de types de frais invalide');
-  return types.map((t) => {
-    const id = String(t?.id ?? '');
-    const label = String(t?.label ?? '').trim();
-    if (!TYPE_ID.test(id) || !TYPE_LABEL.test(label)) throw new Error(`type de frais invalide : ${id.slice(0, 10)}`);
-    return { id, label };
-  });
+  const ids = types.map((t) => String(t?.id ?? ''));
+  if (ids.some((id) => !TYPE_ID.test(id))) throw new Error('type de frais invalide');
+  // Seuls les identifiants connus, avec NOS libellés : le texte envoyé par le client est ignoré.
+  const known = [...new Set(ids)].filter((id) => EXPENSE_TYPES.has(id)).map((id) => ({ id, label: EXPENSE_TYPES.get(id) }));
+  if (!known.length) throw new Error('aucun type de frais connu');
+  return known;
 }
 
 export function buildPrompt(types) {
@@ -61,11 +62,11 @@ ${types.map((t) => `  ${t.id} ${t.label}`).join('\n')}
 }
 
 const IMAGE_DATA_URL = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/;
-export const MAX_IMAGE_CHARS = 8_000_000; // ≈ 6 Mo d'image ; le client envoie ~300 Ko (1600 px JPEG)
+export const MAX_IMAGE_CHARS = 4_000_000; // ≈ 3 Mo d'image ; le client envoie ~300 Ko (photo) à ~2 Mo (3 pages de PDF empilées)
 
 export function validateImage(image) {
   if (typeof image !== 'string' || image.length > MAX_IMAGE_CHARS || !IMAGE_DATA_URL.test(image)) {
-    throw new Error('image attendue : data URL JPEG, PNG ou WebP de moins de 6 Mo');
+    throw new Error('image attendue : data URL JPEG, PNG ou WebP de moins de 3 Mo');
   }
   return image;
 }

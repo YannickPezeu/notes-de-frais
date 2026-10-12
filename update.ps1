@@ -26,6 +26,9 @@ if ($LASTEXITCODE -ne 0) { throw "docker build failed" }
 Write-Host "=== 2/5 Push ===" -ForegroundColor Cyan
 docker push $IMAGE
 if ($LASTEXITCODE -ne 0) { throw "docker push failed" }
+# Empreinte de l'image poussée : c'est elle que le pod exécutera (jamais « :latest »).
+$IMAGE_REF = docker inspect --format '{{index .RepoDigests 0}}' $IMAGE
+if ($LASTEXITCODE -ne 0 -or $IMAGE_REF -notmatch '@sha256:') { throw "empreinte de l'image introuvable" }
 
 Write-Host "=== 3/5 Manifestes ===" -ForegroundColor Cyan
 if (Test-Path k8s/secret.yaml) {
@@ -35,11 +38,13 @@ if (Test-Path k8s/secret.yaml) {
   kubectl get secret notes-de-frais-secrets -n $NAMESPACE | Out-Null
   if ($LASTEXITCODE -ne 0) { throw "secret absent : copiez k8s/secret.yaml.example en k8s/secret.yaml et remplissez RCP_API_KEY" }
 }
-kubectl apply -f k8s/pvc.yaml -f k8s/deployment.yaml -f k8s/service.yaml -f k8s/ingress.yaml
+kubectl apply -f k8s/pvc.yaml -f k8s/service.yaml -f k8s/ingress.yaml
 if ($LASTEXITCODE -ne 0) { throw "kubectl apply failed" }
+# Image épinglée par empreinte + identifiant de déploiement (un redémarrage, même si seul le Secret a changé).
+(Get-Content k8s/deployment.yaml -Raw).Replace($IMAGE, $IMAGE_REF).Replace('{{DEPLOY_ID}}', (Get-Date -Format o)) | kubectl apply -f -
+if ($LASTEXITCODE -ne 0) { throw "kubectl apply deployment failed" }
 
 Write-Host "=== 4/5 Redémarrage ===" -ForegroundColor Cyan
-kubectl rollout restart deployment/$DEPLOYMENT -n $NAMESPACE
 kubectl rollout status deployment/$DEPLOYMENT -n $NAMESPACE --timeout=120s
 if ($LASTEXITCODE -ne 0) { throw "rollout failed" }
 

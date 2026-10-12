@@ -51,6 +51,9 @@ demande l'accès au réseau local : accepter).
   30 jours) : Entra ouvre à tout le personnel, le mot de passe réserve l'accès aux
   testeurs. À retirer du secret au feu vert cybersécurité / DPO.
 
+La page `/stats` (compteurs d'usage) est réservée aux adresses de `STATS_ADMINS`
+(`k8s/deployment.yaml`).
+
 Les cookies (domaine expert-finder.epfl.ch) accompagnent les appels du script
 chargé dans sesame car les deux sont sur le même site `epfl.ch`. Sans aucun
 verrou : tout est refusé en production, accès libre en local.

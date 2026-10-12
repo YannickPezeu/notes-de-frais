@@ -26,7 +26,12 @@ const PUBLIC_URL = (process.env.PUBLIC_URL || '').replace(/\/$/, '');
 // Préfixe de chemin quand le service vit sous un hôte partagé (ex. /notes-de-frais) :
 // l'ingress transmet le chemin complet, c'est à nous de l'enlever.
 const BASE_PATH = (process.env.BASE_PATH || '').replace(/\/$/, '');
-const MAX_BODY = 9_000_000;
+const MAX_BODY = 4_500_000;
+// Appels au modèle traités en même temps (tous usagers) : borne la mémoire du pod (512 Mi).
+const MAX_INFLIGHT = 12;
+// Page /stats : adresses e-mail des administrateurs (variable STATS_ADMINS, séparées par des virgules).
+const STATS_ADMINS = new Set((process.env.STATS_ADMINS || '').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean));
+let inflight = 0;
 const PRODUCTION = process.env.NODE_ENV === 'production';
 // En production, l'adresse publique est fixée : jamais déduite des en-têtes Host /
 // X-Forwarded-Host, qu'un client peut falsifier (redirections, redirect_uri OIDC).
@@ -367,6 +372,11 @@ async function handle(req, res) {
     const base = publicUrl(req);
     const step = missingStep(req);
     if (step) return loginPage(res, base, { step, status: step === 'closed' ? 503 : 200 });
+    // Réservée aux administrateurs (STATS_ADMINS : adresses e-mail EPFL) ; libre en développement.
+    const user = currentUser(req);
+    if (!OPEN && !STATS_ADMINS.has(String(user.email).toLowerCase())) {
+      return html(res, 403, '<!doctype html><meta charset="utf-8"><title>Accès refusé</title><p style="font:16px system-ui;padding:32px">Page réservée aux administrateurs du service.</p>');
+    }
     return html(res, 200, statsPage(stats.summary(), base));
   }
 
@@ -383,6 +393,8 @@ async function handle(req, res) {
     if (!user) return send(res, 401, { error: 'session EPFL expirée : recliquez sur le favori « Note de frais » pour vous reconnecter (vos lignes sont conservées)' });
     if (!API_KEY) return send(res, 503, { error: 'service non configuré (clé RCP absente)' });
     if (!perMinute.take(user.sub) || !perDay.take(user.sub)) return send(res, 429, { error: 'trop de justificatifs envoyés, réessayez dans une minute' });
+    if (inflight >= MAX_INFLIGHT) return send(res, 503, { error: 'serveur occupé, réessayez dans quelques secondes' });
+    inflight++;
     const t0 = Date.now();
     try {
       const body = await readJson(req);
@@ -393,7 +405,7 @@ async function handle(req, res) {
       logError(`${path.slice(1)}_error`, { ms: Date.now() - t0, err: e.message }); // jamais le corps renvoyé par RCP
       stats.call(user.sub, path.slice(1), null, false);
       return send(res, e.status || (e.upstream ? 502 : 400), { error: e.message });
-    }
+    } finally { inflight--; }
   }
 
   return send(res, 404, { error: 'introuvable' });

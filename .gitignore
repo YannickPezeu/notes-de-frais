@@ -4,3 +4,6 @@
 # Secrets locaux
 .env
 k8s/secret.yaml
+
+# Jamais installé (package.json ne sert qu'au suivi des bibliothèques de web/vendor/)
+node_modules/

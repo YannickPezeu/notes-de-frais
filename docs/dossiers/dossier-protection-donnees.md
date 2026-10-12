@@ -63,12 +63,12 @@ L'outil aide les collaborateurs à saisir leurs notes de frais de voyage dans *M
 | Images des justificatifs (photos, PDF) | Usager → navigateur (réduites à 1600 px) → serveur → modèle RCP. Jointes à la note dans SAP, comme aujourd'hui. | Serveur : durée de la requête, aucune écriture sur disque. Plateforme RCP : rien n'est gardé. SAP : règles actuelles des notes de frais. |
 | Champs lus (date, montant, devise, fournisseur, ville, pays, type de frais, description) | Modèle → navigateur → SAP après validation | SAP : règles actuelles. Ailleurs : aucune. |
 | Profil SAP (n° de personnel, nom, SCIPER) | SAP → navigateur uniquement | Mémoire de la page, jusqu'à sa fermeture |
-| Fonds, approbateurs, pays, types de frais | SAP → navigateur. Seule la liste des types de frais (non personnelle) est envoyée au serveur, pour que le modèle choisisse un type existant. | Mémoire de la page |
+| Fonds, approbateurs, pays, types de frais | SAP → navigateur. Seuls les identifiants des types de frais (non personnels) sont envoyés au serveur, pour que le modèle choisisse un type existant. | Mémoire de la page |
 | Notes existantes de l'usager qui chevauchent le voyage (dates, lignes, montants) | SAP → navigateur, lecture seule, pour signaler un doublon | Mémoire de la page |
 | Préférences : identifiants du dernier fonds et du dernier approbateur choisis | Navigateur (stockage local de sesame.epfl.ch) | Jusqu'à effacement par l'usager |
 | Identité EPFL : nom, adresse e-mail, identifiant d'annuaire (connexion Entra ID ; ni accréditations ni droits) | Entra ID → serveur → cookie de session signé, dans le navigateur de la personne | 12 heures (durée de la session) ; rien côté serveur |
 | Logs techniques : erreurs seulement (type d'appel, durée, message d'erreur), sans identité ni pseudonyme ; rien pour un appel réussi ni une connexion | Serveur → logs du conteneur (Kubernetes), sur la machine du cluster qui l'exécute ; pas de collecte centralisée | Jusqu'au prochain déploiement au plus (le conteneur est alors recréé) |
-| Compteurs d'usage (détail ci-dessous) : par jour, nombre de personnes distinctes et de nouvelles personnes, de connexions, d'appels, d'erreurs et de jetons ; par mois, nombre de personnes et de nouvelles personnes ; au total, nombre de personnes depuis la mise en service | Serveur → fichier sur un volume du cluster EPFL ; page `/stats` réservée aux personnes connectées | Sans limite (des nombres seulement) |
+| Compteurs d'usage (détail ci-dessous) : par jour, nombre de personnes distinctes et de nouvelles personnes, de connexions, d'appels, d'erreurs et de jetons ; par mois, nombre de personnes et de nouvelles personnes ; au total, nombre de personnes depuis la mise en service | Serveur → fichier sur un volume du cluster EPFL ; page `/stats` réservée aux administrateurs du service | Sans limite (des nombres seulement) |
 | Empreintes de comptage : HMAC de l'identifiant d'annuaire, avec une clé fixe, pour ne compter chaque personne qu'une fois | Même fichier ; la clé n'y figure pas. **Pseudonymisées** : l'administrateur du service peut les rapprocher des comptes EPFL (voir ci-dessous) | Liste globale : tant que le service existe. Listes du jour et du mois : effacées à la fin du jour ou du mois |
 | Identifiant d'annuaire, comme clé des compteurs de quotas | Mémoire du serveur | 24 h au plus ; effacé à chaque redémarrage |
 | Adresse IP en clair, comme clé du compteur d'essais du mot de passe | Mémoire du serveur | 15 minutes |
@@ -96,7 +96,7 @@ Par mois, on compte aussi les personnes différentes et, parmi elles, les nouvel
 
 > **Ce que l'administrateur peut retrouver.** Ces empreintes sont pseudonymisées, pas anonymes. L'administrateur du service (Yannick Pezeu), qui détient la clé et peut consulter l'annuaire EPFL, pourrait recalculer l'empreinte de chaque compte EPFL et savoir ainsi **quelles personnes ont utilisé le service depuis sa mise en service**, et lesquelles l'ont utilisé le jour ou le mois en cours. Il ne pourrait pas savoir quels jours passés elles sont venues (ces listes sont effacées), ni ce qu'elles ont fait (aucun contenu n'est enregistré). Personne d'autre ne le peut, la clé ne figurant pas dans le fichier. Ce rapprochement n'est pas fait et n'est pas nécessaire au service.
 
-**Qui les voit** : la page `/stats` du service, réservée aux personnes connectées (aujourd'hui l'équipe du projet et les testeurs).
+**Qui les voit** : la page `/stats` du service, réservée aux administrateurs du service (liste fermée d'adresses EPFL ; aujourd'hui le responsable du projet).
 
 ## 4. Destinataires et infrastructures
 

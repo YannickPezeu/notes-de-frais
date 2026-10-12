@@ -1,0 +1,10 @@
+# Alertes et propositions de mise à jour pour les bibliothèques du navigateur déclarées dans
+# package.json. Une mise à jour ne suffit pas : les fichiers sont copiés dans web/vendor/ et leurs
+# empreintes figées dans web/ndf.js (procédure dans web/vendor/README.md).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3

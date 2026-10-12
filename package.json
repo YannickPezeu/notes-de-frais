@@ -1,0 +1,14 @@
+{
+  "name": "notes-de-frais",
+  "private": true,
+  "description": "Notes de frais EPFL : favori sesame, lecture des justificatifs par l'IA de l'EPFL (RCP), brouillon SAP. Le serveur n'a aucune dépendance npm.",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": { "test": "node --test tests/core.test.mjs tests/server.test.mjs tests/stats.test.mjs" },
+  "//": "Bibliothèques du navigateur copiées dans web/vendor/ (voir web/vendor/README.md), déclarées ici pour que les scanners de vulnérabilités (OSV, Dependabot) les suivent. Elles ne sont pas installées par le serveur.",
+  "dependencies": {
+    "heic2any": "0.0.4",
+    "pdfjs-dist": "6.3.289",
+    "utif": "3.1.0"
+  }
+}
