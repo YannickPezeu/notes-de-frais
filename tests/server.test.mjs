@@ -267,6 +267,9 @@ test('production sans aucun verrou : tout est refusé, jamais d\'accès libre', 
       child.on('exit', (c) => reject(new Error(`serveur arrêté (${c})`)));
     });
     const b = `http://127.0.0.1:${port}`;
+    const health = await fetch(`${b}/healthz`);
+    assert.equal(health.status, 503, 'production mal configurée : pas prête');
+    assert.deepEqual(await health.json(), { ok: false });
     const home = await fetch(`${b}/`);
     assert.equal(home.status, 503);
     assert.match(await home.text(), /Aucune méthode de connexion/);
@@ -329,7 +332,7 @@ test('logs : rien pour un appel réussi ni une connexion, erreurs sans identité
   assert.equal(lines.length, 1, lines.join('\n'));
   const e = JSON.parse(lines[0]);
   assert.equal(e.ev, 'classify_error');
-  assert.ok(Object.keys(e).every((k) => ['ev', 'ms', 'err', 'detail'].includes(k)), `champs : ${Object.keys(e)}`);
+  assert.ok(Object.keys(e).every((k) => ['ev', 'ms', 'err'].includes(k)), `champs : ${Object.keys(e)}`);
   assert.ok(!('u' in e) && !lines[0].includes('oid-alice') && !lines[0].includes('Alice'));
 });
 
@@ -349,18 +352,47 @@ test('audit : en-têtes de sécurité et CSP stricte sur les pages', async () =>
   assert.equal((await fetch(`${base}/ndf.js`, { headers: { Cookie: COOKIES } })).headers.get('content-security-policy'), null);
 });
 
-test('audit : mot de passe refusé depuis un autre site ; essais comptés sur la vraie IP', async () => {
-  const form = (headers) => fetch(`${base}/password`, {
+test('audit : mot de passe — pas d\u2019essai anonyme ni depuis un autre site ; limite par IP et par personne', async () => {
+  const sessionOf = async (oid) => {
+    idp.claims = { oid };
+    const r = await entraLogin();
+    idp.claims = {};
+    return cookiesOf(r).find((c) => c.startsWith('ndf_session='));
+  };
+  const form = (cookie, headers = {}) => fetch(`${base}/password`, {
     method: 'POST', redirect: 'manual',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded', ...headers }, body: new URLSearchParams({ password: 'faux' }),
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', Cookie: cookie, ...headers }, body: new URLSearchParams({ password: 'faux' }),
   });
-  assert.equal((await form({ Origin: 'https://evil.example' })).status, 403);
+  const anon = await form('');
+  assert.equal(anon.status, 401, 'sans connexion EPFL : aucun essai possible');
+  assert.match(await anon.text(), /compte EPFL/);
+  const carol = await sessionOf('oid-carol');
+  assert.equal((await form(carol, { Origin: 'https://evil.example' })).status, 403);
   // X-Forwarded-For : le client peut écrire les premières valeurs, pas la dernière (ajoutée par l'ingress).
   let last;
-  for (let i = 0; i < 11; i++) last = await form({ 'X-Forwarded-For': `10.9.9.${i}, 192.0.2.77` });
+  for (let i = 0; i < 11; i++) last = await form(carol, { 'X-Forwarded-For': `10.9.9.${i}, 192.0.2.77` });
   assert.equal(last.status, 429, 'changer les premières valeurs ne contourne pas la limite');
-  assert.equal((await form({ 'X-Forwarded-For': '192.0.2.77, 192.0.2.78' })).status, 401, 'autre IP réelle : pas bloquée');
+  assert.equal((await form(carol, { 'X-Forwarded-For': '192.0.2.99' })).status, 429, 'même personne depuis une autre IP : bloquée aussi');
+  const dave = await sessionOf('oid-dave');
+  assert.equal((await form(dave, { 'X-Forwarded-For': '192.0.2.100' })).status, 401, 'autre personne, autre IP : pas bloquée');
 });
+
+test('audit : bibliothèques tierces vérifiées par empreinte avant exécution, HSTS, /healthz minimal', async () => {
+  const { readFileSync } = await import('node:fs');
+  const { createHash } = await import('node:crypto');
+  const src = readFileSync(new URL('../web/ndf.js', import.meta.url), 'utf8');
+  const table = /const VENDOR_SHA256 = \{([\s\S]*?)\};/.exec(src)[1];
+  const pinned = Object.fromEntries([...table.matchAll(/'([^']+)': '([0-9a-f]{64})'/g)].map((m) => [m[1], m[2]]));
+  assert.equal(Object.keys(pinned).length, 4);
+  for (const [file, hash] of Object.entries(pinned)) {
+    const served = Buffer.from(await (await fetch(`${base}/vendor/${file}`)).arrayBuffer());
+    assert.equal(createHash('sha256').update(served).digest('hex'), hash, `${file} : empreinte servie = empreinte attendue`);
+  }
+  assert.ok(src.includes("throw new Error('empreinte inattendue, fichier refusé')"));
+  const h = await fetch(`${base}/healthz`);
+  assert.deepEqual(await h.json(), { ok: true }, 'ni rcp ni auth révélés');
+});
+
 
 test('audit : en production, PUBLIC_URL est obligatoire', async () => {
   const env = { ...process.env, NODE_ENV: 'production', PUBLIC_URL: '' };

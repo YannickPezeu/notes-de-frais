@@ -194,6 +194,14 @@ créée en **brouillon** (Save, jamais Submit). Doit marcher aussi sur télépho
   production. Non changé, expliqué : chargement des décodeurs par `new Function` (même source
   que ndf.js, donc même confiance) ; HSTS à poser au niveau de l'ingress (vaut pour tout
   l'hôte expert-finder). 50 tests.
+- [x] **2e audit automatique EPFL** (12.10.2026, job-76e8f136, plus de High). Corrigé (image
+  `sha256:6f0d36b3…`) : bibliothèques tierces **vérifiées par SHA-256 avant exécution**
+  (chargées depuis la mémoire, fichier modifié refusé ; essayé dans Chrome), documentées dans
+  `web/vendor/README.md` ; STATS_SECRET sans repli sur SESSION_SECRET ; HSTS (valeur de
+  l'hôte) ; /healthz = {ok} seulement (503 si config incomplète) ; corps des erreurs RCP
+  retiré des logs ; mot de passe essayable seulement après la connexion EPFL, limite par IP
+  et par personne. Accepté et documenté : sessions sans état (12 h, non révocables une à une).
+  51 tests. Dossier cybersécurité mis à jour (R2, R5, points d'accès).
 - [ ] **Envoyer les dossiers** à la cybersécurité et à la DPO ; **avis bloquants** avant tout pilote
 - [ ] Au feu vert : rendre le dépôt GitHub public
 - [ ] Au feu vert : retirer `ACCESS_PASSWORD` du secret (ou restreindre l'app Entra à un groupe)

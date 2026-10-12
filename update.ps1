@@ -49,7 +49,8 @@ $health = $null
 foreach ($i in 1..10) {
   try { $health = Invoke-RestMethod "$URL/healthz" -TimeoutSec 5; break } catch { Start-Sleep -Seconds 3 }
 }
-if (-not $health.ok -or -not $health.rcp -or -not $health.auth) { throw "healthz KO : $($health | ConvertTo-Json -Compress)" }
+# ok = clé RCP et connexion EPFL configurées (sinon /healthz répond 503).
+if (-not $health.ok) { throw "healthz KO : $($health | ConvertTo-Json -Compress)" }
 # Pod le plus récent : juste après le redémarrage, l'ancien peut encore être listé (en arrêt).
 $digest = kubectl get pods -n $NAMESPACE -l app=$DEPLOYMENT --sort-by=.metadata.creationTimestamp -o jsonpath="{.items[-1:].status.containerStatuses[0].imageID}"
 Write-Host "OK : $URL  (image $digest)" -ForegroundColor Green

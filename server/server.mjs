@@ -64,7 +64,7 @@ const auth = process.env.ENTRA_CLIENT_ID ? createAuth({
 export const accessToken = (password) => createHmac('sha256', password).update('ndf-access-v1').digest('hex').slice(0, 32);
 const PASSWORD_TOKEN = process.env.ACCESS_PASSWORD ? accessToken(process.env.ACCESS_PASSWORD) : '';
 const passwordOk = (req) => !PASSWORD_TOKEN || sameString(readCookie(req.headers.cookie, 'ndf_access') || '', PASSWORD_TOKEN);
-const passwordTries = new RateLimiter(10, 15 * 60_000); // 10 essais par quart d'heure et par IP
+const passwordTries = new RateLimiter(10, 15 * 60_000); // 10 essais par quart d'heure, par IP et par personne
 const OPEN = !auth && !PASSWORD_TOKEN;
 console.warn(`accès : ${[auth && 'connexion EPFL', PASSWORD_TOKEN && 'mot de passe'].filter(Boolean).join(' + ')
   || (PRODUCTION ? '⚠ aucun verrou configuré, accès refusé à tous' : '⚠ libre (développement)')}`);
@@ -116,8 +116,11 @@ const VENDOR_FILES = new Set(readdirSync(new URL('web/vendor/', ROOT), { recursi
 const logError = (ev, fields) => console.log(JSON.stringify({ ev, ...fields }));
 
 // Compteurs d'usage (server/stats.mjs), dans un fichier du volume persistant en production.
-// STATS_SECRET : clé des empreintes, à ne jamais changer (sinon tout le monde redevient « nouveau »).
-const stats = createStats({ file: process.env.STATS_FILE || '', secret: process.env.STATS_SECRET || process.env.SESSION_SECRET || randomBytes(32) });
+// STATS_SECRET : clé des empreintes, propre aux compteurs (jamais celle des sessions), à ne
+// jamais changer (sinon tout le monde redevient « nouveau »). Absente : clé aléatoire en
+// mémoire, les compteurs de personnes repartent alors à chaque redémarrage.
+if (!process.env.STATS_SECRET) console.warn('⚠ STATS_SECRET absente : personnes recomptées à chaque redémarrage.');
+const stats = createStats({ file: process.env.STATS_FILE || '', secret: process.env.STATS_SECRET || randomBytes(32) });
 
 function publicUrl(req) {
   if (PUBLIC_URL) return PUBLIC_URL;
@@ -144,6 +147,7 @@ const SECURITY_HEADERS = {
   'Referrer-Policy': 'no-referrer',
   'X-Frame-Options': 'DENY',
   'Cross-Origin-Opener-Policy': 'unsafe-none', // la fenêtre de connexion doit pouvoir prévenir sesame
+  ...(PUBLIC_URL.startsWith('https:') ? { 'Strict-Transport-Security': 'max-age=63072000' } : {}),
 };
 
 function send(res, status, body, type = 'application/json; charset=utf-8', extra = {}) {
@@ -256,7 +260,11 @@ async function handle(req, res) {
 
   if (req.method === 'OPTIONS') return send(res, 204, '');
 
-  if (req.method === 'GET' && path === '/healthz') return send(res, 200, { ok: true, rcp: Boolean(API_KEY), auth: Boolean(auth) });
+  // Sonde publique : ne dit que « prêt ou non ». En production, prêt = clé RCP et connexion EPFL configurées.
+  if (req.method === 'GET' && path === '/healthz') {
+    const ok = !PRODUCTION || (Boolean(API_KEY) && Boolean(auth));
+    return send(res, ok ? 200 : 503, { ok });
+  }
 
   // ── Connexion EPFL ──────────────────────────────────────────────────────
   // Point d'entrée de la connexion (depuis la page d'accueil, ou en fenêtre depuis sesame).
@@ -299,7 +307,12 @@ async function handle(req, res) {
     const form = await readForm(req);
     const popup = form.get('popup') === '1';
     if (!PASSWORD_TOKEN) return loggedIn(res, base, popup);
-    if (!passwordTries.take(clientIp(req))) return loginPage(res, base, { step: 'password', popup, status: 429, error: 'Trop d’essais : réessayez dans un quart d’heure.' });
+    // Avec la connexion EPFL, on ne peut essayer le mot de passe qu'une fois connecté : pas
+    // d'essais anonymes, et la limite vaut par personne (en plus de l'IP).
+    const entraUser = auth?.user(req.headers.cookie);
+    if (auth && !entraUser) return loginPage(res, base, { step: 'entra', popup, status: 401, error: 'Connectez-vous d’abord avec votre compte EPFL.' });
+    const tooMany = !passwordTries.take(`ip:${clientIp(req)}`) || (entraUser && !passwordTries.take(`u:${entraUser.sub}`));
+    if (tooMany) return loginPage(res, base, { step: 'password', popup, status: 429, error: 'Trop d’essais : réessayez dans un quart d’heure.' });
     if (!sameString(accessToken(form.get('password') || ''), PASSWORD_TOKEN)) {
       return loginPage(res, base, { step: 'password', popup, status: 401, error: 'Mot de passe incorrect.' });
     }
@@ -360,7 +373,7 @@ async function handle(req, res) {
       stats.call(user.sub, path.slice(1), out.usage);
       return send(res, 200, out);
     } catch (e) {
-      logError(`${path.slice(1)}_error`, { ms: Date.now() - t0, err: e.message, detail: e.detail });
+      logError(`${path.slice(1)}_error`, { ms: Date.now() - t0, err: e.message }); // jamais le corps renvoyé par RCP
       stats.call(user.sub, path.slice(1), null, false);
       return send(res, e.status || (e.upstream ? 502 : 400), { error: e.message });
     }

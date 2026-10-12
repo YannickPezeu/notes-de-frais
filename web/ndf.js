@@ -771,20 +771,41 @@
   let pdfjsPromise;
   const umdCache = {};
 
+  // Empreintes SHA-256 des bibliothèques tierces (web/vendor/README.md) : un fichier qui ne
+  // correspond pas est refusé AVANT d'être exécuté. À changer avec la bibliothèque elle-même.
+  const VENDOR_SHA256 = {
+    'pdfjs-6.3.289/pdf.min.mjs': 'f401927e692efc7735e0cd528c490d0dd31b7f0972c122b7040df805be45cce4',
+    'pdfjs-6.3.289/pdf.worker.min.mjs': 'a33cfe728c584fdba4fcc1fd54bcdc2f9f2f13889ddbb5b2bd1d0f8cbe49b84e',
+    'heic2any-0.0.4.min.js': '0963cfa50e9e1e7e6af929a40a81e3e898a673f1270eafa6917dd137e4968164',
+    'utif-3.1.0.js': 'e3e76115f49571e39624c3316a76b3c4c5b2c5ca518dfec4b66a9f7af8c6d059',
+  };
+
+  /** Bibliothèque téléchargée puis vérifiée octet pour octet (intégrité de sous-ressource « maison »). */
+  async function fetchVerified(file) {
+    const r = await fetch(`${VENDOR}/${file}`);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const bytes = await r.arrayBuffer();
+    const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
+    const hex = [...digest].map((b) => b.toString(16).padStart(2, '0')).join('');
+    if (hex !== VENDOR_SHA256[file]) throw new Error('empreinte inattendue, fichier refusé');
+    return bytes;
+  }
+  // Code vérifié servi depuis la mémoire : le navigateur exécute exactement les octets contrôlés.
+  const blobUrl = (bytes) => URL.createObjectURL(new Blob([bytes], { type: 'text/javascript' }));
+
   function loadPdfjs() {
-    pdfjsPromise ??= import(`${VENDOR}/pdfjs-6.3.289/pdf.min.mjs`).then((m) => {
-      m.GlobalWorkerOptions.workerSrc = `${VENDOR}/pdfjs-6.3.289/pdf.worker.min.mjs`;
-      return m;
-    }).catch((e) => { pdfjsPromise = null; throw new Error(`lecteur PDF indisponible (${e.message})`); });
+    pdfjsPromise ??= Promise.all([fetchVerified('pdfjs-6.3.289/pdf.min.mjs'), fetchVerified('pdfjs-6.3.289/pdf.worker.min.mjs')])
+      .then(async ([lib, worker]) => {
+        const m = await import(blobUrl(lib));
+        m.GlobalWorkerOptions.workerSrc = blobUrl(worker);
+        return m;
+      }).catch((e) => { pdfjsPromise = null; throw new Error(`lecteur PDF indisponible (${e.message})`); });
     return pdfjsPromise;
   }
 
-  /** Script UMD exécuté dans sa propre portée : aucune variable globale posée dans sesame. */
+  /** Script UMD vérifié puis exécuté dans sa propre portée : aucune variable globale posée dans sesame. */
   function loadUmd(file) {
-    umdCache[file] ??= fetch(`${VENDOR}/${file}`).then((r) => {
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      return r.text();
-    }).then((src) => {
+    umdCache[file] ??= fetchVerified(file).then((bytes) => new TextDecoder().decode(bytes)).then((src) => {
       const module = { exports: {} };
       new Function('module', 'exports', 'define', 'require', src)(module, module.exports, undefined, undefined);
       return module.exports;
