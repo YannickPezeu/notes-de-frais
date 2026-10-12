@@ -59,6 +59,7 @@ export function createAuth({ tenantId, clientId, clientSecret, sessionSecret, au
   const { sign, unsign } = signer(sessionSecret);
   let discovery = null;
   let keys = null; // kid → clé publique
+  let keysAt = 0;
 
   async function getJson(url, init) {
     const r = await fetchImpl(url, { ...init, signal: AbortSignal.timeout(10_000) });
@@ -73,10 +74,14 @@ export function createAuth({ tenantId, clientId, clientSecret, sessionSecret, au
   }
 
   async function publicKey(kid) {
-    if (!keys?.has(kid)) { // clé inconnue : Entra a peut-être tourné ses clés, on relit une fois
+    // Clés relues toutes les 24 h, ou plus tôt si une clé inconnue apparaît (Entra les fait
+    // tourner), mais au plus une fois toutes les 5 minutes.
+    const age = Date.now() - keysAt;
+    if (!keys || age > 86_400_000 || (!keys.has(kid) && age > 300_000)) {
       const { jwks_uri } = await config();
       const { keys: list = [] } = await getJson(jwks_uri);
       keys = new Map(list.filter((k) => k.kty === 'RSA').map((k) => [k.kid, createPublicKey({ key: k, format: 'jwk' })]));
+      keysAt = Date.now();
     }
     const key = keys.get(kid);
     if (!key) throw new AuthError('jeton Entra signé par une clé inconnue', 401);
@@ -96,7 +101,7 @@ export function createAuth({ tenantId, clientId, clientSecret, sessionSecret, au
     const { issuer } = await config();
     const t = now();
     if (c.iss !== issuer) throw new AuthError('émetteur du jeton inattendu', 401);
-    if (c.aud !== clientId) throw new AuthError('jeton destiné à une autre application', 401);
+    if (c.aud !== clientId || (c.azp && c.azp !== clientId)) throw new AuthError('jeton destiné à une autre application', 401);
     if (!(c.exp > t - 60) || (c.nbf && c.nbf > t + 60)) throw new AuthError('jeton Entra expiré', 401);
     if (!nonce || !sameString(c.nonce || '', nonce)) throw new AuthError('jeton Entra rejoué (nonce)', 401);
     if (tenantId && c.tid && c.tid !== tenantId) throw new AuthError('compte d’un autre annuaire', 403);

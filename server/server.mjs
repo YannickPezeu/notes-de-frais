@@ -2,7 +2,7 @@
 //   GET  /              page d'installation du favori (bookmarklet), après connexion EPFL
 //   GET  /login         connexion EPFL (Entra ID) ; ?popup=1 depuis sesame
 //   GET  /auth/callback retour d'Entra → cookie de session
-//   GET  /logout
+//   POST /logout
 //   GET  /ndf.js        le script chargé dans sesame par le favori (sinon : invitation à se connecter)
 //   GET  /vendor/*      décodeurs PDF / HEIC / TIFF chargés par ndf.js à la demande
 //   POST /extract       lecture d'un justificatif (clé RCP côté serveur)
@@ -63,7 +63,18 @@ const auth = process.env.ENTRA_CLIENT_ID ? createAuth({
 // Jeton dérivé du mot de passe, gardé en cookie 30 jours ; changer le mot de passe le révoque.
 export const accessToken = (password) => createHmac('sha256', password).update('ndf-access-v1').digest('hex').slice(0, 32);
 const PASSWORD_TOKEN = process.env.ACCESS_PASSWORD ? accessToken(process.env.ACCESS_PASSWORD) : '';
-const passwordOk = (req) => !PASSWORD_TOKEN || sameString(readCookie(req.headers.cookie, 'ndf_access') || '', PASSWORD_TOKEN);
+// Avec la connexion EPFL, le cookie du mot de passe est propre à chaque personne (dérivé de son
+// identifiant d'annuaire) : volé, il ne sert à rien dans la session de quelqu'un d'autre.
+export const accessCookie = (password, sub) => {
+  const token = accessToken(password);
+  return sub ? createHmac('sha256', token).update(`ndf-access:${sub}`).digest('hex').slice(0, 32) : token;
+};
+const accessCookieFor = (user) => (auth ? accessCookie(process.env.ACCESS_PASSWORD, user.sub) : PASSWORD_TOKEN);
+function passwordOk(req, user = auth?.user(req.headers.cookie)) {
+  if (!PASSWORD_TOKEN) return true;
+  if (auth && !user) return false;
+  return sameString(readCookie(req.headers.cookie, 'ndf_access') || '', accessCookieFor(user));
+}
 const passwordTries = new RateLimiter(10, 15 * 60_000); // 10 essais par quart d'heure, par IP et par personne
 const OPEN = !auth && !PASSWORD_TOKEN;
 console.warn(`accès : ${[auth && 'connexion EPFL', PASSWORD_TOKEN && 'mot de passe'].filter(Boolean).join(' + ')
@@ -144,7 +155,9 @@ function cors(req, res) {
 
 const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
-  'Referrer-Policy': 'no-referrer',
+  // same-origin : le navigateur annonce l'origine à notre site seulement (contrôle Origin des
+  // formulaires) et n'envoie rien aux autres. Avec no-referrer, nos formulaires partaient en Origin: null.
+  'Referrer-Policy': 'same-origin',
   'X-Frame-Options': 'DENY',
   'Cross-Origin-Opener-Policy': 'unsafe-none', // la fenêtre de connexion doit pouvoir prévenir sesame
   ...(PUBLIC_URL.startsWith('https:') ? { 'Strict-Transport-Security': 'max-age=63072000' } : {}),
@@ -226,10 +239,13 @@ function popupDone() {
 setTimeout(() => window.close(), 400);</script></body></html>`;
 }
 
+// Formulaire posé depuis nos pages : en-tête Origin présent et égal au nôtre (ni absent, ni « null »).
+const sameOrigin = (req, base) => req.headers.origin === new URL(base).origin;
+
 function bookmarklet(base) {
   // Charge le script à chaque clic (sans cache) : c'est lui qui rouvre le panneau
   // existant ou le remplace s'il date d'une version antérieure du serveur.
-  return `javascript:(()=>{if(!/(^|\\.)sesame\\.epfl\\.ch$/.test(location.hostname))return alert('Ouvrez d\\'abord sesame.epfl.ch (My Travel and Expenses), puis recliquez sur ce favori.');var s=document.createElement('script');s.src='${base}/ndf.js?t='+Date.now();document.body.appendChild(s)})()`;
+  return `javascript:(()=>{if(!/(^|\\.)sesame\\.epfl\\.ch$/.test(location.hostname))return alert('Ouvrez d\\'abord sesame.epfl.ch (My Travel and Expenses), puis recliquez sur ce favori.');var s=document.createElement('script');s.src=${JSON.stringify(`${base}/ndf.js?t=`)}+Date.now();document.body.appendChild(s)})()`;
 }
 
 const n = (x) => Number(x || 0).toLocaleString('fr-CH');
@@ -295,7 +311,7 @@ async function handle(req, res) {
     stats.login(done.user.sub);
     const headers = { 'Set-Cookie': [clearTx, cookie('ndf_session', done.sessionCookie, base, { maxAge: auth.sessionMaxAge })] };
     // Mot de passe de la phase de test encore à saisir : même fenêtre, étape suivante.
-    if (!passwordOk(req)) return loginPage(res, base, { step: 'password', popup: done.popup, headers });
+    if (!passwordOk(req, done.user)) return loginPage(res, base, { step: 'password', popup: done.popup, headers });
     return loggedIn(res, base, done.popup, headers);
   }
 
@@ -303,7 +319,7 @@ async function handle(req, res) {
     const base = publicUrl(req);
     // Pas de soumission depuis un autre site (le formulaire vient toujours de nos pages).
     const origin = req.headers.origin;
-    if (origin && origin !== 'null' && origin !== new URL(base).origin) return send(res, 403, { error: 'origine non autorisée' });
+    if (!sameOrigin(req, base)) return send(res, 403, { error: 'origine non autorisée' });
     const form = await readForm(req);
     const popup = form.get('popup') === '1';
     if (!PASSWORD_TOKEN) return loggedIn(res, base, popup);
@@ -316,11 +332,12 @@ async function handle(req, res) {
     if (!sameString(accessToken(form.get('password') || ''), PASSWORD_TOKEN)) {
       return loginPage(res, base, { step: 'password', popup, status: 401, error: 'Mot de passe incorrect.' });
     }
-    return loggedIn(res, base, popup, { 'Set-Cookie': cookie('ndf_access', PASSWORD_TOKEN, base, { maxAge: 2592000 }) });
+    return loggedIn(res, base, popup, { 'Set-Cookie': cookie('ndf_access', accessCookieFor(entraUser), base, { maxAge: 2592000 }) });
   }
 
-  if (req.method === 'GET' && path === '/logout') {
+  if (req.method === 'POST' && path === '/logout') {
     const base = publicUrl(req);
+    if (!sameOrigin(req, base)) return send(res, 403, { error: 'origine non autorisée' });
     return send(res, 303, '', 'text/plain', { Location: `${base}/`, 'Set-Cookie': cookie('ndf_session', '', base, { maxAge: 0 }) });
   }
 
@@ -332,7 +349,7 @@ async function handle(req, res) {
     const user = currentUser(req);
     return html(res, 200, asset('web/index.html')
       .replaceAll('{{BOOKMARKLET}}', bookmarklet(base).replace(/&/g, '&amp;').replace(/"/g, '&quot;'))
-      .replaceAll('{{WHO}}', auth ? `<p class="who">Connecté·e : ${escHtml(user.name || user.email)} · <a href="${escHtml(`${base}/logout`)}">se déconnecter</a></p>` : '')
+      .replaceAll('{{WHO}}', auth ? `<div class="who">Connecté·e : ${escHtml(user.name || user.email)} · <form method="post" action="${escHtml(`${base}/logout`)}"><button>se déconnecter</button></form></div>` : '')
       .replaceAll('{{BASE}}', base));
   }
 

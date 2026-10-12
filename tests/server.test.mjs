@@ -28,7 +28,7 @@ async function entraLogin({ popup = false, state: forcedState, txCookie } = {}) 
 
 const postPassword = (password, cookie, popup = false) => fetch(`${base}/password`, {
   method: 'POST', redirect: 'manual',
-  headers: { 'Content-Type': 'application/x-www-form-urlencoded', Cookie: cookie },
+  headers: { 'Content-Type': 'application/x-www-form-urlencoded', Cookie: cookie, Origin: new URL(base).origin },
   body: new URLSearchParams({ password, ...(popup ? { popup: '1' } : {}) }),
 });
 
@@ -52,8 +52,8 @@ before(async () => {
   });
   Object.assign(mod, await import('../server/extract.mjs'));
   Object.assign(authMod, await import('../server/auth.mjs'));
-  const { server, accessToken } = await import('../server/server.mjs');
-  KEY = accessToken('Test-pw!');
+  const { server, accessCookie } = await import('../server/server.mjs');
+  KEY = accessCookie('Test-pw!', 'oid-alice');
   app = server.listen(0);
   base = `http://127.0.0.1:${app.address().port}/notes-de-frais`;
   // Session complète (EPFL + mot de passe) pour les tests qui ne portent pas sur la connexion.
@@ -183,6 +183,14 @@ test('connexion EPFL : PKCE, state et nonce, puis mot de passe, puis installatio
   assert.match(await (await fetch(`${base}/`, { headers: { Cookie: `ndf_access=${KEY}` } })).text(), /Se connecter/);
 });
 
+test('audit : cookie du mot de passe propre à chaque personne', async () => {
+  idp.claims = { oid: 'oid-bob' };
+  const bob = cookiesOf(await entraLogin()).find((c) => c.startsWith('ndf_session='));
+  idp.claims = {};
+  const withAlicesCookie = await (await fetch(`${base}/`, { headers: { Cookie: `${bob}; ndf_access=${KEY}` } })).text();
+  assert.match(withAlicesCookie, /type="password"/, 'le cookie d’Alice ne dispense pas Bob du mot de passe');
+});
+
 test('connexion depuis sesame (fenêtre) : EPFL, mot de passe, puis la page est prévenue', async () => {
   const r2 = await entraLogin({ popup: true });
   const pw = await r2.text();
@@ -250,7 +258,9 @@ test('session : falsifiée ou expirée refusée, déconnexion', async () => {
   assert.equal(s.unsign(s.sign({ sub: 'x', exp: 1 })), null, 'expirée');
   assert.match(await (await fetch(`${base}/`, { headers: { Cookie: `ndf_session=${tampered}; ndf_access=${KEY}` } })).text(), /Se connecter/);
   assert.throws(() => authMod.createAuth({ clientId: 'c', clientSecret: 's', sessionSecret: 'court' }), /SESSION_SECRET/);
-  const out = await fetch(`${base}/logout`, { redirect: 'manual', headers: { Cookie: COOKIES } });
+  assert.equal((await fetch(`${base}/logout`, { redirect: 'manual', headers: { Cookie: COOKIES } })).status, 404, 'plus de GET');
+  assert.equal((await fetch(`${base}/logout`, { method: 'POST', redirect: 'manual', headers: { Cookie: COOKIES, Origin: 'https://evil.example' } })).status, 403);
+  const out = await fetch(`${base}/logout`, { method: 'POST', redirect: 'manual', headers: { Cookie: COOKIES, Origin: new URL(base).origin } });
   assert.equal(out.status, 303);
   assert.match(out.headers.get('set-cookie'), /^ndf_session=; Path=\/notes-de-frais; Max-Age=0/);
 });
@@ -339,7 +349,7 @@ test('logs : rien pour un appel réussi ni une connexion, erreurs sans identité
 test('audit : en-têtes de sécurité et CSP stricte sur les pages', async () => {
   const r = await fetch(`${base}/`, { headers: { Cookie: COOKIES } });
   assert.equal(r.headers.get('x-frame-options'), 'DENY');
-  assert.equal(r.headers.get('referrer-policy'), 'no-referrer');
+  assert.equal(r.headers.get('referrer-policy'), 'same-origin', 'origine annoncée à notre site seulement (contrôle Origin des formulaires)');
   const policy = r.headers.get('content-security-policy');
   assert.match(policy, /default-src 'none'/);
   assert.match(policy, /frame-ancestors 'none'/);
@@ -361,13 +371,16 @@ test('audit : mot de passe — pas d\u2019essai anonyme ni depuis un autre site 
   };
   const form = (cookie, headers = {}) => fetch(`${base}/password`, {
     method: 'POST', redirect: 'manual',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded', Cookie: cookie, ...headers }, body: new URLSearchParams({ password: 'faux' }),
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', Cookie: cookie, Origin: new URL(base).origin, ...headers }, body: new URLSearchParams({ password: 'faux' }),
   });
   const anon = await form('');
   assert.equal(anon.status, 401, 'sans connexion EPFL : aucun essai possible');
   assert.match(await anon.text(), /compte EPFL/);
   const carol = await sessionOf('oid-carol');
   assert.equal((await form(carol, { Origin: 'https://evil.example' })).status, 403);
+  assert.equal((await form(carol, { Origin: 'null' })).status, 403, 'Origin: null (iframe isolée, data:) refusée');
+  const noOrigin = await fetch(`${base}/password`, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', Cookie: carol }, body: 'password=x' });
+  assert.equal(noOrigin.status, 403, 'sans Origin : refusé');
   // X-Forwarded-For : le client peut écrire les premières valeurs, pas la dernière (ajoutée par l'ingress).
   let last;
   for (let i = 0; i < 11; i++) last = await form(carol, { 'X-Forwarded-For': `10.9.9.${i}, 192.0.2.77` });

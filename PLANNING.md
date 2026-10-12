@@ -202,6 +202,13 @@ créée en **brouillon** (Save, jamais Submit). Doit marcher aussi sur télépho
   retiré des logs ; mot de passe essayable seulement après la connexion EPFL, limite par IP
   et par personne. Accepté et documenté : sessions sans état (12 h, non révocables une à une).
   51 tests. Dossier cybersécurité mis à jour (R2, R5, points d'accès).
+- [x] **3e audit automatique EPFL** (12.10.2026, job-c306e295, plus de High, 1 Medium). Corrigé
+  (image `sha256:1704322c…`) : Referrer-Policy `same-origin` (avec `no-referrer` nos propres
+  formulaires partaient en `Origin: null`) puis `Origin: null` refusé sur /password ; cookie
+  du mot de passe propre à chaque personne (lié à l'oid) ; déconnexion en POST avec contrôle
+  d'origine ; `azp` vérifié, clés Entra relues toutes les 24 h (5 min mini) ; adresse du favori
+  échappée. Parcours complet revérifié dans Chrome. Laissé et documenté : confiance dans
+  l'ingress pour l'IP, bibliothèques publiques, conservation des empreintes. 52 tests.
 - [ ] **Envoyer les dossiers** à la cybersécurité et à la DPO ; **avis bloquants** avant tout pilote
 - [ ] Au feu vert : rendre le dépôt GitHub public
 - [ ] Au feu vert : retirer `ACCESS_PASSWORD` du secret (ou restreindre l'app Entra à un groupe)
