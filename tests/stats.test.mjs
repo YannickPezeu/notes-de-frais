@@ -1,7 +1,7 @@
 // node --test tests/ — compteurs d'usage (server/stats.mjs).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createStats, dayOf } from '../server/stats.mjs';
@@ -58,6 +58,7 @@ test('persistance : compteurs et liste globale gardés au redémarrage, sans auc
   a.flush();
   const raw = readFileSync(file, 'utf8');
   assert.ok(!raw.includes('oid-alice') && !raw.includes('10.0.0.7'), 'ni identifiant ni IP en clair');
+  if (process.platform !== 'win32') assert.equal(statSync(file).mode & 0o777, 0o600, 'lisible par le seul compte du service');
 
   // Redémarrage le même jour : Alice n'est ni recomptée ni « nouvelle ».
   const b = createStats({ file, secret: SECRET, now: c.now });

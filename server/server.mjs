@@ -28,6 +28,9 @@ const PUBLIC_URL = (process.env.PUBLIC_URL || '').replace(/\/$/, '');
 const BASE_PATH = (process.env.BASE_PATH || '').replace(/\/$/, '');
 const MAX_BODY = 9_000_000;
 const PRODUCTION = process.env.NODE_ENV === 'production';
+// En production, l'adresse publique est fixée : jamais déduite des en-têtes Host /
+// X-Forwarded-Host, qu'un client peut falsifier (redirections, redirect_uri OIDC).
+if (PRODUCTION && !PUBLIC_URL) throw new Error('PUBLIC_URL est obligatoire en production');
 
 // Clé RCP : variable d'environnement (k8s) ou, en dev, `API-KEY=` du .env du dépôt.
 function loadApiKey() {
@@ -66,8 +69,11 @@ const OPEN = !auth && !PASSWORD_TOKEN;
 console.warn(`accès : ${[auth && 'connexion EPFL', PASSWORD_TOKEN && 'mot de passe'].filter(Boolean).join(' + ')
   || (PRODUCTION ? '⚠ aucun verrou configuré, accès refusé à tous' : '⚠ libre (développement)')}`);
 
+// IP du client : la DERNIÈRE valeur de X-Forwarded-For, celle qu'ajoute notre ingress (un
+// seul relais devant le pod). Les premières peuvent être écrites par le client lui-même.
 function clientIp(req) {
-  return String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket.remoteAddress || '?';
+  const hops = String(req.headers['x-forwarded-for'] || '').split(',').map((h) => h.trim()).filter(Boolean);
+  return hops.at(-1) || req.socket.remoteAddress || '?';
 }
 
 /** Étape de connexion manquante ('entra' | 'password'), ou null si la personne peut entrer. */
@@ -90,7 +96,7 @@ const perMinute = new RateLimiter(Number(process.env.RATE_PER_MINUTE || 60), 60_
 const perDay = new RateLimiter(Number(process.env.RATE_PER_DAY || 1000), 86_400_000);
 
 // Fichiers relus à chaque requête en dev (NDF_DEV=1), mis en cache sinon.
-const DEV = process.env.NDF_DEV === '1';
+const DEV = process.env.NDF_DEV === '1' && !PRODUCTION; // jamais de raccourci de dev en production
 const cache = new Map();
 function asset(rel) {
   if (!DEV && cache.has(rel)) return cache.get(rel);
@@ -133,8 +139,15 @@ function cors(req, res) {
   }
 }
 
+const SECURITY_HEADERS = {
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'no-referrer',
+  'X-Frame-Options': 'DENY',
+  'Cross-Origin-Opener-Policy': 'unsafe-none', // la fenêtre de connexion doit pouvoir prévenir sesame
+};
+
 function send(res, status, body, type = 'application/json; charset=utf-8', extra = {}) {
-  res.writeHead(status, { 'Content-Type': type, 'X-Content-Type-Options': 'nosniff', ...extra });
+  res.writeHead(status, { 'Content-Type': type, ...SECURITY_HEADERS, ...extra });
   res.end(typeof body === 'string' ? body : JSON.stringify(body));
 }
 
@@ -155,7 +168,16 @@ async function readJson(req) {
 }
 
 const escHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const html = (res, status, body, extra = {}) => send(res, status, body, 'text/html; charset=utf-8', { 'Cache-Control': 'no-store', ...extra });
+// CSP des pages HTML : rien d'externe, pas d'encadrement ; scripts en ligne autorisés
+// seulement par leur empreinte (les nôtres, calculées ici), jamais un script injecté.
+function csp(body) {
+  const hashes = [...body.matchAll(/<script>([\s\S]*?)<\/script>/g)]
+    .map((m) => `'sha256-${createHash('sha256').update(m[1]).digest('base64')}'`);
+  return ["default-src 'none'", `script-src ${hashes.join(' ') || "'none'"}`, "style-src 'unsafe-inline'", "img-src 'self' data:",
+    "form-action 'self'", "base-uri 'none'", "frame-ancestors 'none'"].join('; ');
+}
+const html = (res, status, body, extra = {}) => send(res, status, body, 'text/html; charset=utf-8',
+  { 'Cache-Control': 'no-store', 'Content-Security-Policy': csp(body), ...extra });
 
 /** Page de l'étape de connexion manquante : bouton EPFL, ou formulaire du mot de passe. */
 function loginPage(res, base, { step = 'entra', status = 200, error = '', popup = false, headers = {} } = {}) {
@@ -271,6 +293,9 @@ async function handle(req, res) {
 
   if (req.method === 'POST' && path === '/password') {
     const base = publicUrl(req);
+    // Pas de soumission depuis un autre site (le formulaire vient toujours de nos pages).
+    const origin = req.headers.origin;
+    if (origin && origin !== 'null' && origin !== new URL(base).origin) return send(res, 403, { error: 'origine non autorisée' });
     const form = await readForm(req);
     const popup = form.get('popup') === '1';
     if (!PASSWORD_TOKEN) return loggedIn(res, base, popup);

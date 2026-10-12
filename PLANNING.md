@@ -186,6 +186,14 @@ créée en **brouillon** (Save, jamais Submit). Doit marcher aussi sur télépho
   des valeurs fictives ; secrets exclus (.env, k8s/secret.yaml, .har) ; `.gitattributes`
   (LF, bibliothèques tierces octet pour octet = empreintes du dossier). Image
   `sha256:3e2fd33d…`.
+- [x] **Audit automatique EPFL** (12.10.2026, job-c2c1c575) : aucun secret ni dépendance
+  vulnérable. Corrigé (image `sha256:ecb76bdc…`) : IP prise sur la dernière valeur de
+  X-Forwarded-For (ajoutée par l'ingress) ; PUBLIC_URL obligatoire en production (plus de
+  redirection tirée de Host) ; CSP stricte (scripts par empreinte), X-Frame-Options, Referrer-
+  Policy ; /password refusé depuis un autre site ; stats.json en 600 ; NDF_DEV sans effet en
+  production. Non changé, expliqué : chargement des décodeurs par `new Function` (même source
+  que ndf.js, donc même confiance) ; HSTS à poser au niveau de l'ingress (vaut pour tout
+  l'hôte expert-finder). 50 tests.
 - [ ] **Envoyer les dossiers** à la cybersécurité et à la DPO ; **avis bloquants** avant tout pilote
 - [ ] Au feu vert : rendre le dépôt GitHub public
 - [ ] Au feu vert : retirer `ACCESS_PASSWORD` du secret (ou restreindre l'app Entra à un groupe)

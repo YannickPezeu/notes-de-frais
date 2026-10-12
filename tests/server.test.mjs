@@ -256,7 +256,7 @@ test('session : falsifiée ou expirée refusée, déconnexion', async () => {
 });
 
 test('production sans aucun verrou : tout est refusé, jamais d\'accès libre', async () => {
-  const env = { ...process.env, NODE_ENV: 'production', PORT: '0', ENTRA_CLIENT_ID: '', ACCESS_PASSWORD: '', BASE_PATH: '' };
+  const env = { ...process.env, NODE_ENV: 'production', PORT: '0', ENTRA_CLIENT_ID: '', ACCESS_PASSWORD: '', BASE_PATH: '', PUBLIC_URL: 'https://exemple.epfl.ch' };
   const child = spawn(process.execPath, ['--input-type=module', '-e',
     "const { server } = await import('./server/server.mjs'); server.listen(0, () => console.log('PORT=' + server.address().port));"],
   { env, cwd: new URL('..', import.meta.url) });
@@ -331,6 +331,45 @@ test('logs : rien pour un appel réussi ni une connexion, erreurs sans identité
   assert.equal(e.ev, 'classify_error');
   assert.ok(Object.keys(e).every((k) => ['ev', 'ms', 'err', 'detail'].includes(k)), `champs : ${Object.keys(e)}`);
   assert.ok(!('u' in e) && !lines[0].includes('oid-alice') && !lines[0].includes('Alice'));
+});
+
+test('audit : en-têtes de sécurité et CSP stricte sur les pages', async () => {
+  const r = await fetch(`${base}/`, { headers: { Cookie: COOKIES } });
+  assert.equal(r.headers.get('x-frame-options'), 'DENY');
+  assert.equal(r.headers.get('referrer-policy'), 'no-referrer');
+  const policy = r.headers.get('content-security-policy');
+  assert.match(policy, /default-src 'none'/);
+  assert.match(policy, /frame-ancestors 'none'/);
+  assert.match(policy, /script-src 'sha256-[A-Za-z0-9+/=]+'/, 'script de la page autorisé par son empreinte');
+  assert.ok(!policy.includes("script-src 'unsafe-inline'"));
+  // Fenêtre de connexion terminée : son script de fermeture est autorisé, rien d'autre.
+  const done = await fetch(`${base}/login?popup=1`, { headers: { Cookie: COOKIES } });
+  assert.match(done.headers.get('content-security-policy'), /script-src 'sha256-/);
+  // Le script servi dans sesame n'a pas de CSP (il s'exécute dans la page sesame).
+  assert.equal((await fetch(`${base}/ndf.js`, { headers: { Cookie: COOKIES } })).headers.get('content-security-policy'), null);
+});
+
+test('audit : mot de passe refusé depuis un autre site ; essais comptés sur la vraie IP', async () => {
+  const form = (headers) => fetch(`${base}/password`, {
+    method: 'POST', redirect: 'manual',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', ...headers }, body: new URLSearchParams({ password: 'faux' }),
+  });
+  assert.equal((await form({ Origin: 'https://evil.example' })).status, 403);
+  // X-Forwarded-For : le client peut écrire les premières valeurs, pas la dernière (ajoutée par l'ingress).
+  let last;
+  for (let i = 0; i < 11; i++) last = await form({ 'X-Forwarded-For': `10.9.9.${i}, 192.0.2.77` });
+  assert.equal(last.status, 429, 'changer les premières valeurs ne contourne pas la limite');
+  assert.equal((await form({ 'X-Forwarded-For': '192.0.2.77, 192.0.2.78' })).status, 401, 'autre IP réelle : pas bloquée');
+});
+
+test('audit : en production, PUBLIC_URL est obligatoire', async () => {
+  const env = { ...process.env, NODE_ENV: 'production', PUBLIC_URL: '' };
+  const child = spawn(process.execPath, ['--input-type=module', '-e', "await import('./server/server.mjs');"], { env, cwd: new URL('..', import.meta.url) });
+  let err = '';
+  child.stderr.on('data', (d) => { err += d; });
+  const code = await new Promise((r) => child.on('exit', r));
+  assert.notEqual(code, 0);
+  assert.match(err, /PUBLIC_URL est obligatoire en production/);
 });
 
 test('limite : 20 justificatifs par minute et par personne', async () => {

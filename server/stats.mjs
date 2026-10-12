@@ -69,7 +69,7 @@ export function createStats({ file = '', secret, now = () => new Date(), flushMs
     data.open.monthUsers = [...monthUsers];
     try {
       mkdirSync(dirname(file), { recursive: true });
-      writeFileSync(`${file}.tmp`, JSON.stringify(data));
+      writeFileSync(`${file}.tmp`, JSON.stringify(data), { mode: 0o600 }); // lisible par le seul compte du service
       renameSync(`${file}.tmp`, file); // jamais de fichier à moitié écrit
     } catch (e) { log(`statistiques non enregistrées : ${e.message}`); }
   }
