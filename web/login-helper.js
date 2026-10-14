@@ -3,6 +3,7 @@
 // déjà ouvert (et ses lignes) est alors simplement réaffiché.
 // La fenêtre s'ouvre sur un clic dans ce cadre : ouverte d'office, un bloqueur la refuserait.
 (() => {
+  if (!/(^|\.)sesame\.epfl\.ch$/.test(window.location.hostname)) return; // seulement dans sesame
   const BASE = '{{BASE}}';
   const ORIGIN = new URL(BASE).origin;
   document.getElementById('ndf-login-host')?.remove();

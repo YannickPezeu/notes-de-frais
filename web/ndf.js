@@ -446,6 +446,8 @@
   // Sous Node (tests) : on exporte le cœur et on s'arrête là.
   if (typeof window === 'undefined' && typeof module !== 'undefined' && module.exports) { module.exports = Core; return; }
   if (typeof window === 'undefined') return;
+  // Défense en profondeur : le favori vérifie déjà l'hôte, le script aussi (revue cybersécurité du 14.10.2026).
+  if (!/(^|\.)sesame\.epfl\.ch$/.test(window.location.hostname)) return;
   // Le favori recharge ce script à chaque clic. Même version déjà présente, ou
   // création en cours : on rouvre le panneau tel quel. Version plus ancienne
   // (mise à jour du serveur depuis l'ouverture de sesame) : on la remplace.

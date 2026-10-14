@@ -218,7 +218,18 @@ créée en **brouillon** (Save, jamais Submit). Doit marcher aussi sur télépho
   (`secretKeyRef`, ACCESS_PASSWORD facultatif) ; 12 appels au modèle simultanés au plus,
   images ≤ 3 Mo, pod à 512 Mi ; un seul redémarrage par déploiement. Non fait : NetworkPolicy
   (à voir avec l'exploitant du cluster). 52 tests.
-- [ ] **Envoyer les dossiers** à la cybersécurité et à la DPO ; **avis bloquants** avant tout pilote
+- [x] **Avis de la cybersécurité : FAVORABLE** (14.10.2026, Patrick Saladino) pour le pilote restreint
+  avec le groupe d'assistantes identifié, double verrou (Entra + mot de passe) à garder pendant
+  le pilote. Corrigé le jour même (image `sha256:8d0b14bf…`) : `tid` obligatoire dans le jeton ;
+  ndf.js et le script d'invitation revérifient l'hôte sesame ; limite du mot de passe **par
+  personne seulement** (expert-finder passe par un proxy frontal, icvm0216, hors du cluster :
+  tous les usagers risquaient de partager la même IP et de se bloquer mutuellement).
+- [ ] **Validation par les gestionnaires SAP** (demandée par la cybersécurité) : le script s'exécute
+  dans le contexte de sesame avec la session de l'usager ; à faire valider avant d'élargir.
+  Rappel : si SAP ajoute une CSP à sesame, le favori cessera de fonctionner.
+- [ ] Vérifier avec l'équipe infra/SDDC ce que le proxy frontal d'expert-finder transmet comme IP
+  (plus bloquant : aucune limite ne dépend de l'IP quand la connexion EPFL est active)
+- [ ] **Avis de la DPO** — bloquant avant le pilote
 - [ ] Au feu vert : rendre le dépôt GitHub public
 - [ ] Au feu vert : retirer `ACCESS_PASSWORD` du secret (ou restreindre l'app Entra à un groupe)
 - [x] Rétention RCP (30.09.2026) : l'équipe RCP confirme que la plateforme ne garde aucune trace des

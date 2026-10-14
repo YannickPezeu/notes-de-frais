@@ -80,7 +80,7 @@ function passwordOk(req, user = auth?.user(req.headers.cookie)) {
   if (auth && !user) return false;
   return sameString(readCookie(req.headers.cookie, 'ndf_access') || '', accessCookieFor(user));
 }
-const passwordTries = new RateLimiter(10, 15 * 60_000); // 10 essais par quart d'heure, par IP et par personne
+const passwordTries = new RateLimiter(10, 15 * 60_000); // 10 essais par quart d'heure et par personne (par IP sans Entra)
 const OPEN = !auth && !PASSWORD_TOKEN;
 console.warn(`accès : ${[auth && 'connexion EPFL', PASSWORD_TOKEN && 'mot de passe'].filter(Boolean).join(' + ')
   || (PRODUCTION ? '⚠ aucun verrou configuré, accès refusé à tous' : '⚠ libre (développement)')}`);
@@ -329,10 +329,12 @@ async function handle(req, res) {
     const popup = form.get('popup') === '1';
     if (!PASSWORD_TOKEN) return loggedIn(res, base, popup);
     // Avec la connexion EPFL, on ne peut essayer le mot de passe qu'une fois connecté : pas
-    // d'essais anonymes, et la limite vaut par personne (en plus de l'IP).
+    // d'essais anonymes, et la limite vaut PAR PERSONNE. Pas par IP : derrière le proxy frontal
+    // d'expert-finder, tous les usagers risquent d'arriver avec la même IP, et 10 erreurs
+    // bloqueraient tout le monde (revue cybersécurité du 14.10.2026). Sans connexion EPFL : par IP.
     const entraUser = auth?.user(req.headers.cookie);
     if (auth && !entraUser) return loginPage(res, base, { step: 'entra', popup, status: 401, error: 'Connectez-vous d’abord avec votre compte EPFL.' });
-    const tooMany = !passwordTries.take(`ip:${clientIp(req)}`) || (entraUser && !passwordTries.take(`u:${entraUser.sub}`));
+    const tooMany = !passwordTries.take(entraUser ? `u:${entraUser.sub}` : `ip:${clientIp(req)}`);
     if (tooMany) return loginPage(res, base, { step: 'password', popup, status: 429, error: 'Trop d’essais : réessayez dans un quart d’heure.' });
     if (!sameString(accessToken(form.get('password') || ''), PASSWORD_TOKEN)) {
       return loginPage(res, base, { step: 'password', popup, status: 401, error: 'Mot de passe incorrect.' });

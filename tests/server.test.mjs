@@ -238,6 +238,7 @@ test('jeton Entra : signature, émetteur, audience, date et nonce vérifiés', a
     [{ claims: { exp: Math.floor(Date.now() / 1000) - 3600 } }, /expiré/],
     [{ claims: { nonce: 'rejoue' } }, /nonce/],
     [{ claims: { tid: 'autre-annuaire' } }, /autre annuaire/],
+    [{ claims: { tid: undefined } }, /autre annuaire/], // tid absent : refusé aussi
   ];
   for (const [trap, msg] of cases) {
     idp.forge = Boolean(trap.forge);
@@ -403,6 +404,9 @@ test('audit : mot de passe — pas d\u2019essai anonyme ni depuis un autre site 
   assert.equal((await form(carol, { 'X-Forwarded-For': '192.0.2.99' })).status, 429, 'même personne depuis une autre IP : bloquée aussi');
   const dave = await sessionOf('oid-dave');
   assert.equal((await form(dave, { 'X-Forwarded-For': '192.0.2.100' })).status, 401, 'autre personne, autre IP : pas bloquée');
+  // Derrière le proxy frontal, tout le monde peut arriver avec la même IP : les erreurs de Carol
+  // ne bloquent pas Dave (limite par personne seulement quand la connexion EPFL est active).
+  assert.equal((await form(dave, { 'X-Forwarded-For': '10.9.9.0, 192.0.2.77' })).status, 401, 'même IP que Carol bloquée : Dave passe');
 });
 
 test('audit : bibliothèques tierces vérifiées par empreinte avant exécution, HSTS, /healthz minimal', async () => {

@@ -104,7 +104,8 @@ export function createAuth({ tenantId, clientId, clientSecret, sessionSecret, au
     if (c.aud !== clientId || (c.azp && c.azp !== clientId)) throw new AuthError('jeton destiné à une autre application', 401);
     if (!(c.exp > t - 60) || (c.nbf && c.nbf > t + 60)) throw new AuthError('jeton Entra expiré', 401);
     if (!nonce || !sameString(c.nonce || '', nonce)) throw new AuthError('jeton Entra rejoué (nonce)', 401);
-    if (tenantId && c.tid && c.tid !== tenantId) throw new AuthError('compte d’un autre annuaire', 403);
+    // tid absent = refusé aussi (revue cybersécurité du 14.10.2026).
+    if (tenantId && c.tid !== tenantId) throw new AuthError('compte d’un autre annuaire', 403);
     return c;
   }
 
